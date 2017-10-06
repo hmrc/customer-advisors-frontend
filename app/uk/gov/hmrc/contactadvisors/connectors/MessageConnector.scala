@@ -22,10 +22,9 @@ import uk.gov.hmrc.contactadvisors.WSHttp
 import uk.gov.hmrc.contactadvisors.connectors.models.SecureMessage
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, Upstream4xxResponse}
 
 import scala.concurrent.Future
-import scala.util.Try
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpPost, Upstream4xxResponse }
 
 trait MessageConnector {
 

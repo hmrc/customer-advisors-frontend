@@ -28,10 +28,11 @@ import uk.gov.hmrc.contactadvisors.service.{HtmlCleaner, SecureMessageService}
 import uk.gov.hmrc.play.audit.EventKeys
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
+
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class CustomerAdviceAuditSpec extends UnitSpec with ScalaFutures with OneAppPerSuite with IntegrationPatience with Eventually {
 
