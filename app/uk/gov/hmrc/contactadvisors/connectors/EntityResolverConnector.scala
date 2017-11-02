@@ -21,10 +21,11 @@ import uk.gov.hmrc.contactadvisors.WSHttp
 import uk.gov.hmrc.contactadvisors.domain.UnexpectedFailure
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
+
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpException, HttpGet, Upstream4xxResponse, Upstream5xxResponse }
 
 trait EntityResolverConnector {
   def http: HttpGet

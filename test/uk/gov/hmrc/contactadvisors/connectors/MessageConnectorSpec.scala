@@ -30,9 +30,9 @@ import play.api.libs.json.Json
 import play.test.WithServer
 import uk.gov.hmrc.contactadvisors.WSHttp
 import uk.gov.hmrc.contactadvisors.domain.{AdviceAlreadyExists, AdviceStored, UnexpectedError}
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.utils.SecureMessageCreator
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpPost }
 
 class MessageConnectorSpec extends UnitSpec
   with MockitoSugar

@@ -26,9 +26,9 @@ import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.contactadvisors.WSHttp
 import uk.gov.hmrc.contactadvisors.domain.{CustomerIsNotPaperless, TaxIdNotFound, UnexpectedFailure}
 import uk.gov.hmrc.domain.SaUtr
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.utils.WithWiremock
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet }
 
 
 class EntityResolverConnectorSpec extends UnitSpec
