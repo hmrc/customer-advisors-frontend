@@ -26,12 +26,13 @@ trait MicroService {
 
   lazy val externalServices = List(
     ExternalService("AUTH"),
+    ExternalService("AUTH_LOGIN_API"),
     ExternalService("USER_DETAILS"),
     ExternalService("PREFERENCES"),
-    ExternalService("MESSAGE"),
+    ExternalService("IDENTITY_VERIFICATION", enableTestOnlyEndpoints = true),
+    ExternalService("HMRC_EMAIL_RENDERER"),
+    ExternalService("EMAIL"),
     ExternalService("ENTITY_RESOLVER"),
-    ExternalService("HMRCDESKPRO"),
-    ExternalService("SA"),
     ExternalService("DATASTREAM", enableTestOnlyEndpoints = true)
   )
 
