@@ -46,7 +46,7 @@ class EmailController @Inject()(
         .getOptional[Seq[String]](s"email.stride.roles")
         .getOrElse(List())
         .toSet
-        .toList).filter(_.nonEmpty).collect { case x :: xs => xs.foldLeft[Predicate](Enrolment(x))((b, a) => b or Enrolment(a)) }
+        .toList).collect { case x :: xs => xs.foldLeft[Predicate](Enrolment(x))((b, a) => b or Enrolment(a)) }
 
   def sendEmail: Action[AnyContent] = Action.async { implicit request =>
     {
