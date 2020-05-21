@@ -96,7 +96,7 @@ class EmailControllerISpec extends PlaySpec with ScalaFutures with BeforeAndAfte
     val validJson = Json.parse("""
                                  |{
                                  |  "to": ["example@domain.com"],
-                                 |  "templateId": "seiss_claim_now",
+                                 |  "templateId": "seiss_processing_grant",
                                  |  "parameters": {
                                  |        "name": "Mr Joe Bloggs"
                                  |  },
@@ -107,7 +107,7 @@ class EmailControllerISpec extends PlaySpec with ScalaFutures with BeforeAndAfte
     val extraParameters = Json.parse("""
                                        |{
                                        |  "to": ["example@domain.com"],
-                                       |  "templateId": "seiss_claim_now",
+                                       |  "templateId": "seiss_processing_grant",
                                        |  "parameters": {
                                        |        "name": "Mr Joe Bloggs",
                                        |        "secret": "secret value"
