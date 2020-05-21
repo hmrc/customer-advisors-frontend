@@ -41,12 +41,10 @@ class EmailController @Inject()(
     extends FrontendController(controllerComponents) with AuthorisedFunctions {
 
   lazy val predicates: Option[Predicate] =
-    Option(
-      conf
-        .getOptional[Seq[String]](s"email.stride.roles")
-        .getOrElse(List())
-        .toSet
-        .toList).collect { case x :: xs => xs.foldLeft[Predicate](Enrolment(x))((b, a) => b or Enrolment(a)) }
+    conf
+      .getOptional[Seq[String]](s"email.stride.roles")
+      .map(_.distinct)
+      .collect { case x :: xs => xs.foldLeft[Predicate](Enrolment(x))((b, a) => b or Enrolment(a)) }
 
   def sendEmail: Action[AnyContent] = Action.async { implicit request =>
     {
