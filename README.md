@@ -12,12 +12,12 @@ To restrict the endpoint to users with particular entitlements, update email.str
 For example:
 - staging: update app-config-staging/customer-advisor-frontend.yaml
   hmrc_config:
-     email.stride.roles.0: RG-RTS_NRL_1_Robot_Staging-GD
+     email.stride.roles.0: role1
 
 - production: update app-config-production/customer-advisor-frontend.yaml
   hmrc_config:
-     email.stride.roles.0: RG-RTS_R40_Robot_Live-GD
-     email.stride.roles.1: RG-RTS_R40_Robot_Beta-GD
+     email.stride.roles.0: role2
+     email.stride.roles.1: role3
 
 #### License
 
