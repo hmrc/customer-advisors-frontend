@@ -8,16 +8,6 @@ A frontend used by contact advisors to respond to messages.
 
 By default proxy is available for all stride users with supported clientId.
 
-To restrict the endpoint to users with particular entitlements, update email.stride.role in environment yaml
-For example:
-- staging: update app-config-staging/customer-advisor-frontend.yaml
-  hmrc_config:
-     email.stride.roles.0: role1
-
-- production: update app-config-production/customer-advisor-frontend.yaml
-  hmrc_config:
-     email.stride.roles.0: role2
-     email.stride.roles.1: role3
 
 #### License
 
