@@ -17,16 +17,14 @@ object FrontendBuild extends Build with MicroService {
 private object AppDependencies {
 
   import play.sbt.PlayImport._
-  import play.core.PlayVersion
 
   def apply() = Seq(
     ws,
-    "uk.gov.hmrc"            %% "bootstrap-play-26"            % "1.1.0",
-    "uk.gov.hmrc"            %% "govuk-template"               % "5.42.0-play-26",
-    "uk.gov.hmrc"            %% "domain"                       % "5.6.0-play-26",
-    "uk.gov.hmrc"            %% "play-ui"                      % "8.3.0-play-26",
-    "uk.gov.hmrc"            %% "play-partials"                % "6.9.0-play-26",
-    "uk.gov.hmrc"            %% "play-filters"                 % "5.18.0",
+    "uk.gov.hmrc"            %% "bootstrap-play-26"            % "1.16.0",
+    "uk.gov.hmrc"            %% "govuk-template"               % "5.57.0-play-26",
+    "uk.gov.hmrc"            %% "domain"                       % "5.10.0-play-26",
+    "uk.gov.hmrc"            %% "play-ui"                      % "8.12.0-play-26",
+    "uk.gov.hmrc"            %% "play-partials"                % "6.11.0-play-26",
     "com.typesafe.play"      %% "play-json-joda"               % "2.6.13",
     "org.jsoup"              % "jsoup"                         % "1.12.1",
     "org.skyscreamer"        % "jsonassert"                    % "1.4.0",
@@ -34,6 +32,6 @@ private object AppDependencies {
     "org.pegdown"            % "pegdown"                       % "1.6.0"                % "test,it",
     "org.mockito"            % "mockito-all"                   % "1.10.19"              % "test",
     "org.scalatestplus.play" %% "scalatestplus-play"           % "3.1.0"                % "test,it",
-    "uk.gov.hmrc"            %% "service-integration-test"     % "0.9.0-play-26"        % "test, it"
+    "uk.gov.hmrc"            %% "service-integration-test"     % "0.12.0-play-26"       % "test, it"
   )
 }

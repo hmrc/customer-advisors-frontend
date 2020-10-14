@@ -21,19 +21,18 @@ import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{ Eventually, ScalaFutures }
 import org.scalatestplus.play.PlaySpec
-import play.api.Mode
 import play.api.http.Status._
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.integration.ServiceSpec
+
 import scala.concurrent.duration._
 
 class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Eventually with ServiceSpec {
 
-  override val applicationMode = Mode.Test
   def externalServices: Seq[String] = Seq.empty
 
-  protected def startTimeout = 240.seconds
+  protected def startTimeout: FiniteDuration = 240.seconds
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
