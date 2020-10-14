@@ -45,7 +45,7 @@ class EntityResolverConnector @Inject()(http: HttpClient, runModeConfiguration: 
 
     http.GET[Option[PaperlessPreference]](s"$serviceUrl/portal/preferences/sa/$utr").recoverWith {
       case Upstream4xxResponse(msg, code, _, _) => unexpectedFailure(msg)
-      case Upstream5xxResponse(msg, code, _)    => unexpectedFailure(msg)
+      case Upstream5xxResponse(msg, code, _, _) => unexpectedFailure(msg)
       case http: HttpException =>
         unexpectedFailure(
           s"""[${http.responseCode}] ${http.message}"""
