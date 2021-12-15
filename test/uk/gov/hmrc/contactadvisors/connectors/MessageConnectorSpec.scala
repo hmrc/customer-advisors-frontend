@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,27 +21,25 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import com.github.tomakehurst.wiremock.http.Fault
+
 import javax.inject.{ Inject, Singleton }
 import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import org.scalatestplus.play.{ PlaySpec }
+import org.scalatestplus.play.PlaySpec
 import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.{ Configuration, Environment }
 import uk.gov.hmrc.contactadvisors.domain.{ AdviceAlreadyExists, AdviceStored, UnexpectedError }
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
 
 @Singleton
 class TestMessageConnector @Inject()(
   http: HttpClient,
-  override val runModeConfiguration: Configuration,
-  servicesConfig: ServicesConfig,
-  override val environment: Environment)
-    extends MessageConnector(http, runModeConfiguration, servicesConfig, environment) {
+  servicesConfig: ServicesConfig
+) extends MessageConnector(http, servicesConfig) {
 
   override lazy val serviceUrl: String = s"http://localhost:58008"
 }

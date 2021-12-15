@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,16 @@ import play.api.libs.json.Json
 import play.api.{ Configuration, Environment }
 import uk.gov.hmrc.contactadvisors.domain.UnexpectedFailure
 import uk.gov.hmrc.domain.SaUtr
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpException, Upstream4xxResponse, Upstream5xxResponse }
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, HttpException, Upstream4xxResponse, Upstream5xxResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class EntityResolverConnector @Inject()(http: HttpClient, runModeConfiguration: Configuration, servicesConfig: ServicesConfig, environment: Environment)
-    extends Status {
+class EntityResolverConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfig) extends Status {
 
-  lazy val serviceUrl: String = servicesConfig.baseUrl("entity-resolver")
+  lazy val serviceUrl = servicesConfig.baseUrl("entity-resolver")
 
   def validPaperlessUserWith(utr: SaUtr)(implicit hc: HeaderCarrier): Future[Option[PaperlessPreference]] = {
     implicit val preferenceFormats = PaperlessPreference.formats

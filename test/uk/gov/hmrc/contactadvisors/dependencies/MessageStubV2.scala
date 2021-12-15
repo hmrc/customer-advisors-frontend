@@ -1,4 +1,20 @@
 /*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +37,7 @@ import org.apache.commons.codec.binary.Base64
 import org.joda.time.DateTime
 import org.skyscreamer.jsonassert.JSONCompareMode
 import play.api.http.Status
+import uk.gov.hmrc.contactadvisors.connectors.models.ExternalReferenceV2
 import uk.gov.hmrc.contactadvisors.domain.AdviceV2
 
 trait MessageStubV2 {
@@ -44,7 +61,7 @@ trait MessageStubV2 {
          |}
      """.stripMargin)
 
-  def givenMessageRespondsWith(advice: AdviceV2, response: (Int, String)): Unit =
+  def givenMessageRespondsWith(externalRefId: String, advice: AdviceV2, response: (Int, String)): Unit =
     givenThat(
       post(urlEqualTo(messageEndpoint))
         .withRequestBody(
@@ -62,6 +79,7 @@ trait MessageStubV2 {
                  |  "email":"${advice.recipientEmail}"},
                  | "externalRef":
                  | {
+                 |  "id":"$externalRefId",
                  |  "source":"sees"
                  | },
                  | "messageType":"${advice.messageType}",
@@ -71,11 +89,9 @@ trait MessageStubV2 {
                  | "alertQueue":"PRIORITY"
                  |}
          """.stripMargin
-            },
-            false,
-            true
+            }
           )
         )
-        .withRequestBody(matchingJsonPath("$.externalRef.id"))
+        //   .withRequestBody(matchingJsonPath("$.externalRef.id"))
         .willReturn(aResponse().withStatus(response._1).withBody(response._2)))
 }

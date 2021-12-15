@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@
 package uk.gov.hmrc.contactadvisors.controllers
 
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers._
+import org.scalatest.matchers.must.Matchers
 import org.mockito.Mockito._
 import org.scalatest.concurrent.{ Eventually, IntegrationPatience, ScalaFutures }
-import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.MessagesApi
@@ -30,10 +29,16 @@ import play.api.{ Configuration, Environment }
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.EventKeys
 import uk.gov.hmrc.play.audit.http.connector.{ AuditConnector, AuditResult }
 import uk.gov.hmrc.play.audit.model.DataEvent
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{ verify, when }
+import org.scalatestplus.mockito.MockitoSugar.mock
 import scala.concurrent.Future
 
 class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOneAppPerSuite with IntegrationPatience with Eventually {
@@ -43,6 +48,8 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     "audit the successful event" in new TestCaseV2 {
       when(secureMessageServiceMock.createMessageV2(any(), any())(any(), any()))
         .thenReturn(Future.successful(AdviceStored("1234")))
+
+      when(secureMessageServiceMock.generateExternalRefID).thenReturn("75d80f37-2cb4-4571-a100-5f8511986fb7")
 
       controller.submitV2()(request).futureValue
 
@@ -100,7 +107,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     "audit the duplicate message event" in new TestCaseV2 {
       when(secureMessageServiceMock.createMessageV2(any(), any())(any(), any()))
         .thenReturn(Future.successful(AdviceAlreadyExists))
-
+      when(secureMessageServiceMock.generateExternalRefID).thenReturn("75d80f37-2cb4-4571-a100-5f8511986fb7")
       controller.submitV2()(request).futureValue
 
       eventually {
@@ -158,7 +165,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     "audit the unexpected error event" in new TestCaseV2 {
       when(secureMessageServiceMock.createMessageV2(any(), any())(any(), any()))
         .thenReturn(Future.successful(UnexpectedError("this is the reason")))
-
+      when(secureMessageServiceMock.generateExternalRefID).thenReturn("75d80f37-2cb4-4571-a100-5f8511986fb7")
       controller.submitV2()(request).futureValue
 
       eventually {
@@ -220,20 +227,45 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     }
   }
 
-  trait TestCaseV2 extends MockitoSugar {
-    val secureMessageServiceMock = mock[SecureMessageService]
-    val customerAdviceAuditMock = new CustomerAdviceAudit(auditConnectorMock)
-
-    val env = Environment.simple()
-    val configuration = Configuration.reference ++ Configuration.from(Map("Test.google-analytics.token" -> "token", "Test.google-analytics.host" -> "host"))
-
+  trait TestCaseV2 {
     val auditConnectorMock = mock[AuditConnector]
+    val secureMessageServiceMock = mock[SecureMessageService]
+
+    val customerAdviceAuditMock = new CustomerAdviceAudit(auditConnectorMock)
+    val env = Environment.simple()
+
+    val configuration = Configuration.reference ++ Configuration.from(Map("Test.google-analytics.token" -> "token", "Test.google-analytics.host" -> "host"))
     val customerAdviceAudit = new CustomerAdviceAudit(auditConnectorMock)
     val appConfig = app.injector.instanceOf[FrontendAppConfig]
     val controllerComponents = app.injector.instanceOf[MessagesControllerComponents]
     val messageApi = app.injector.instanceOf[MessagesApi]
+    val inboxPage = app.injector.instanceOf[Inbox]
+    val inboxPageV2 = app.injector.instanceOf[InboxV2]
+    val successPage = app.injector.instanceOf[Success]
+    val successPageV2 = app.injector.instanceOf[SuccessV2]
+    val duplicatePage = app.injector.instanceOf[Duplicate]
+    val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
+    val notPaperlessPage = app.injector.instanceOf[Not_paperless]
+    val unknownPage = app.injector.instanceOf[Unknown]
+    val unexpectedPage = app.injector.instanceOf[Unexpected]
+    val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
 
-    val controller = new SecureMessageController(controllerComponents, customerAdviceAudit, secureMessageServiceMock, messageApi)(appConfig) {
+    val controller = new SecureMessageController(
+      controllerComponents,
+      customerAdviceAudit,
+      secureMessageServiceMock,
+      messageApi,
+      inboxPage,
+      inboxPageV2,
+      successPage,
+      successPageV2,
+      duplicatePage,
+      duplicatePageV2,
+      notPaperlessPage,
+      unknownPage,
+      unexpectedPage,
+      unexpectedV2Page
+    )(appConfig) {
       val secureMessageService: SecureMessageService = secureMessageServiceMock
 
       def auditSource: String = "customer-advisors-frontend"

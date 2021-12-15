@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +16,51 @@
 
 package uk.gov.hmrc.contactadvisors.controllers
 
-import java.util.UUID
+import play.api.Logging
 
+import java.util.UUID
 import javax.inject.{ Inject, Singleton }
-import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
+import play.api.i18n.Lang.logger
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
 import uk.gov.hmrc.contactadvisors.connectors.models.ExternalReferenceV2
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.EventKeys
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{ DataEvent, EventTypes }
-import uk.gov.hmrc.play.bootstrap.controller.{ FrontendController }
-
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ Future }
-
+import scala.concurrent.Future
+import uk.gov.hmrc.contactadvisors.views.html.{ Home, secureMessage }
 @Singleton
 class SecureMessageController @Inject()(
   controllerComponents: MessagesControllerComponents,
   customerAdviceAudit: CustomerAdviceAudit,
   secureMessageService: SecureMessageService,
-  messagesApi: MessagesApi)(implicit val appConfig: uk.gov.hmrc.contactadvisors.FrontendAppConfig)
-    extends FrontendController(controllerComponents) with I18nSupport {
+  messagesApi: MessagesApi,
+  inboxPage: Inbox,
+  inboxPageV2: InboxV2,
+  successPage: Success,
+  successPageV2: SuccessV2,
+  duplicatePage: Duplicate,
+  duplicatePageV2: DuplicateV2,
+  notPaperlessPage: Not_paperless,
+  unknownPage: Unknown,
+  unexpectedPage: Unexpected,
+  unexpectedV2Page: UnexpectedV2
+)(implicit val appConfig: uk.gov.hmrc.contactadvisors.FrontendAppConfig)
+    extends FrontendController(controllerComponents) with I18nSupport with Logging {
 
   def inbox(utr: String) = Action.async { implicit request =>
     Future.successful(
       Ok(
-        uk.gov.hmrc.contactadvisors.views.html.secureMessage.inbox(
+        inboxPage(
           utr,
           adviceForm.fill(Advice("Response to your enquiry from HMRC customer services", ""))
         )
@@ -59,9 +71,7 @@ class SecureMessageController @Inject()(
   def inboxV2 = Action.async { implicit request =>
     Future.successful(
       Ok(
-        uk.gov.hmrc.contactadvisors.views.html.secureMessage.inboxV2(
-          adviceFormV2.fill(AdviceV2("", "", "", "", "", "", ""))
-        )
+        inboxPageV2(adviceFormV2.fill(AdviceV2("", "", "", "", "", "", "")))
       )
     )
   }
@@ -70,7 +80,7 @@ class SecureMessageController @Inject()(
     adviceForm.bindFromRequest.fold(
       formWithErrors =>
         Future.successful(
-          BadRequest(uk.gov.hmrc.contactadvisors.views.html.secureMessage.inbox(utr, formWithErrors))
+          BadRequest(inboxPage(utr, formWithErrors))
       ),
       advice => {
         val result = secureMessageService.createMessage(advice, SaUtr(utr))
@@ -89,13 +99,11 @@ class SecureMessageController @Inject()(
           formWithErrors =>
             Future.successful(
               {
-                BadRequest(uk.gov.hmrc.contactadvisors.views.html.secureMessage.inboxV2(formWithErrors))
+                BadRequest(inboxPageV2(formWithErrors))
               }
           ),
           advice => {
-            def generateExternalRefID = UUID.randomUUID().toString
-
-            val externalReference = ExternalReferenceV2(generateExternalRefID)
+            val externalReference = ExternalReferenceV2(secureMessageService.generateExternalRefID)
             val result = secureMessageService.createMessageV2(advice, externalReference)
             customerAdviceAudit.auditAdviceV2(result, advice, externalReference)
             result.map {
@@ -108,49 +116,49 @@ class SecureMessageController @Inject()(
 
   def success(utr: String) = Action.async { implicit request =>
     Future.successful(
-      Ok(uk.gov.hmrc.contactadvisors.views.html.secureMessage.success(utr))
+      Ok(successPage(utr))
     )
   }
 
   def successV2() = Action.async { implicit request =>
     Future.successful(
-      Ok(uk.gov.hmrc.contactadvisors.views.html.secureMessage.successV2())
+      Ok(successPageV2())
     )
   }
 
   def duplicate(utr: String) = Action.async { implicit request =>
     Future.successful(
-      Ok(uk.gov.hmrc.contactadvisors.views.html.secureMessage.duplicate(utr))
+      Ok(duplicatePage(utr))
     )
   }
 
   def duplicateV2() = Action.async { implicit request =>
     Future.successful(
-      Ok(uk.gov.hmrc.contactadvisors.views.html.secureMessage.duplicateV2())
+      Ok(duplicatePageV2())
     )
   }
 
   def unexpected(utr: String) = Action.async { implicit request =>
     Future.successful(
-      Ok(uk.gov.hmrc.contactadvisors.views.html.secureMessage.unexpected(utr))
+      Ok(unexpectedPage(utr))
     )
   }
 
   def unexpectedV2() = Action.async { implicit request =>
     Future.successful(
-      Ok(uk.gov.hmrc.contactadvisors.views.html.secureMessage.unexpectedV2())
+      Ok(unexpectedV2Page())
     )
   }
 
   def unknown(utr: String) = Action.async { implicit request =>
     Future.successful(
-      Ok(uk.gov.hmrc.contactadvisors.views.html.secureMessage.unknown(utr))
+      Ok(unknownPage(utr))
     )
   }
 
   def notPaperless(utr: String) = Action.async { implicit request =>
     Future.successful(
-      Ok(uk.gov.hmrc.contactadvisors.views.html.secureMessage.not_paperless(utr))
+      Ok(notPaperlessPage(utr))
     )
   }
 
@@ -221,7 +229,7 @@ class CustomerAdviceAudit @Inject()(auditConnector: AuditConnector) {
         }
         .foreach { ev =>
           auditConnector.sendEvent(ev).onFailure {
-            case err => Logger.error("Could not audit event", err)
+            case err => logger.error("Could not audit event", err)
           }
         }
     }
@@ -282,7 +290,7 @@ class CustomerAdviceAudit @Inject()(auditConnector: AuditConnector) {
         }
         .foreach { ev =>
           auditConnector.sendEvent(ev).onFailure {
-            case err => Logger.error("Could not audit event")
+            case err => logger.error("Could not audit event")
           }
         }
     }

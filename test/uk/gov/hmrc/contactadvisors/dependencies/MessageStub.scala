@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,13 @@
 package uk.gov.hmrc.contactadvisors.dependencies
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import org.skyscreamer.jsonassert.JSONCompareMode
 import play.api.http.Status
+import uk.gov.hmrc.contactadvisors.connectors.MessageResponse
 import uk.gov.hmrc.contactadvisors.connectors.models.SecureMessage
+import uk.gov.hmrc.http.HttpClient
+
+import java.util.UUID
+import javax.inject.Inject
 
 trait MessageStub {
   val messageEndpoint = "/messages"
@@ -51,7 +55,7 @@ trait MessageStub {
          |}
      """.stripMargin)
 
-  def givenMessageRespondsWith(request: SecureMessage, response: (Int, String)): Unit =
+  def givenMessageRespondsWith(exteranlRefId: String = UUID.randomUUID().toString, request: SecureMessage, response: (Int, String)): Unit =
     givenThat(
       post(urlEqualTo(messageEndpoint))
         .withRequestBody(
@@ -65,6 +69,7 @@ trait MessageStub {
                |    }
                |  },
                |  "externalRef": {
+               |    "id":"$exteranlRefId",
                |    "source": "customer-advisor"
                |  },
                |  "messageType": "advisor-reply",
@@ -77,9 +82,7 @@ trait MessageStub {
                |    "paperSent": ${request.details.paperSent}
                |  }
                |}
-         """.stripMargin,
-            false,
-            true
+         """.stripMargin
           )
         )
         .willReturn(aResponse().withStatus(response._1).withBody(response._2)))

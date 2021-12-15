@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,15 @@ import javax.inject.{ Inject, Singleton }
 import play.api.libs.json.Json
 import play.api.{ Configuration, Environment }
 import play.mvc.Http.Status
-import uk.gov.hmrc.contactadvisors.connectors.models.{ SecureMessage, SecureMessageV2 }
+import uk.gov.hmrc.contactadvisors.connectors.models.{ ExternalReference, ExternalReferenceV2, SecureMessage, SecureMessageV2 }
 import uk.gov.hmrc.contactadvisors.domain._
-import uk.gov.hmrc.http.{ HeaderCarrier, Upstream4xxResponse }
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, Upstream4xxResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+
 import scala.concurrent.Future
 
 @Singleton
-class MessageConnector @Inject()(http: HttpClient, val runModeConfiguration: Configuration, servicesConfig: ServicesConfig, val environment: Environment)
-    extends Status {
+class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfig) extends Status {
 
   lazy val serviceUrl: String = servicesConfig.baseUrl("message")
 
