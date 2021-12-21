@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,22 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.play.views.html.helpers._
-@import play.api.mvc._
+@import uk.gov.hmrc.contactadvisors.views.html.Layout
+
+@this(layout: Layout)
+
 
 @()(implicit request: Request[_], messages: Messages, appConfig : uk.gov.hmrc.contactadvisors.FrontendAppConfig, flash: Flash)
 
-@uk.gov.hmrc.contactadvisors.views.html.main_template(title = "Advice creation successful", bodyClasses = None) {
 
-    <h2>Success</h2>
-    <div class="alert alert--success" role="alert">
-        <p class="alert__message">
-           Secure inbox message created
-           <ul>
-             <li>FHDDS Reference: @flash.get("taxid").getOrElse("unknown")</li>
-             <li>Id: @flash.get("messageId").getOrElse("unknown")</li>
-             <li>External Ref: @flash.get("externalRef").getOrElse("unknown")</li>
-           </ul>
-        </p>
-    </div>
+@layout(pageTitle = Some("Unexpected error")) {
+
+<h2 class="govuk-heading-m">Failed</h2>
+
+<p class="govuk-error-message">
+    <span class="govuk-visually-hidden">Failed:</span> There is an unexpected problem.<br>
+    Secure inbox message has not been created for FHHDS Reference<br>
+    @flash.get("taxid").getOrElse("unknown")
+</p>
 
 }

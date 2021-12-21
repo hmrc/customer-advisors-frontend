@@ -18,20 +18,20 @@ package uk.gov.hmrc.contactadvisors.service
 
 import org.apache.commons.codec.binary.Base64
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers._
-import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
+import org.mockito.Mockito.{mock, never, verify, when}
 import uk.gov.hmrc.contactadvisors.connectors.models.SecureMessage
-import uk.gov.hmrc.contactadvisors.connectors.{ EntityResolverConnector, MessageConnector, PaperlessPreference }
+import uk.gov.hmrc.contactadvisors.connectors.{EntityResolverConnector, MessageConnector, PaperlessPreference}
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class SecureMessageServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
+class SecureMessageServiceSpec extends PlaySpec with ScalaFutures {
 
   "createMessage" should {
 

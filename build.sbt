@@ -1,6 +1,6 @@
 
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings, targetJvm}
-import uk.gov.hmrc.ExternalService
+import uk.gov.hmrc.{DefaultBuildSettings, ExternalService}
 import uk.gov.hmrc.ForkedJvmPerTestSettings.oneForkedJvmPerTest
 import uk.gov.hmrc.ServiceManagerPlugin.Keys.itDependenciesList
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
@@ -51,20 +51,21 @@ lazy val microservice = Project(appName, file("."))
   .settings(ServiceManagerPlugin.serviceManagerSettings)
   .settings(itDependenciesList := externalServices)
   .settings(
+    DefaultBuildSettings.integrationTestSettings()
 //   Keys.fork in IntegrationTest := false,
  //  unmanagedSourceDirectories in IntegrationTest := (baseDirectory.value in IntegrationTest)(base => Seq(base / "it")),
 //   addTestReportOption(IntegrationTest, "int-test-reports"),
 //   testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
    //parallelExecution in IntegrationTest := false,
-   inConfig(IntegrationTest)(
-    scalafmtCoreSettings ++
-      Seq(
-       compileInputs in compile := Def.taskDyn {
-        val task = test in (resolvedScoped.value.scope in scalafmt.key)
-        val previousInputs = (compileInputs in compile).value
-        task.map(_ => previousInputs)
-       }.value
-      )
-   )
+//   inConfig(IntegrationTest)(
+//    scalafmtCoreSettings ++
+//      Seq(
+//       compileInputs in compile := Def.taskDyn {
+//        val task = test in (resolvedScoped.value.scope in scalafmt.key)
+//        val previousInputs = (compileInputs in compile).value
+//        task.map(_ => previousInputs)
+//       }.value
+//      )
+//   )
   )
   .settings(resolvers ++= Seq(Resolver.jcenterRepo))
