@@ -18,20 +18,21 @@ package uk.gov.hmrc.contactadvisors.controllers
 
 import org.jsoup.Jsoup
 import org.scalatest.Inside
-import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{ MessagesControllerComponents, Result }
+import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.dependencies.MessageStubV2
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.utils.{ SecureMessageCreatorV2, WithWiremock }
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown}
+import uk.gov.hmrc.utils.{SecureMessageCreatorV2, WithWiremock}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -61,8 +62,34 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
   val messageApi = app.injector.instanceOf[MessagesApi]
   val customerAdviceAudit = app.injector.instanceOf[CustomerAdviceAudit]
   val secureMessageService = app.injector.instanceOf[SecureMessageService]
+  val inboxPage = app.injector.instanceOf[Inbox]
+  val inboxPageV2 = app.injector.instanceOf[InboxV2]
+  val successPage = app.injector.instanceOf[Success]
+  val successPageV2 = app.injector.instanceOf[SuccessV2]
+  val duplicatePage = app.injector.instanceOf[Duplicate]
+  val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
+  val notPaperlessPage = app.injector.instanceOf[Not_paperless]
+  val unknownPage  = app.injector.instanceOf[Unknown]
+  val unexpectedPage = app.injector.instanceOf[Unexpected]
+  val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
 
-  val controller = new SecureMessageController(controllerComponents, customerAdviceAudit, secureMessageService, messageApi)(appConfig) {
+
+
+  val controller = new SecureMessageController(controllerComponents,
+    customerAdviceAudit,
+    secureMessageService,
+    messageApi,
+    inboxPage,
+    inboxPageV2,
+    successPage,
+    successPageV2,
+    duplicatePage,
+    duplicatePageV2,
+    notPaperlessPage,
+    unknownPage,
+    unexpectedPage,
+    unexpectedV2Page
+  )(appConfig) {
     def auditSource: String = "customer-advisors-frontend"
   }
 
@@ -81,7 +108,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
     "show main banner" in {
       val result = controller.inboxV2()(getRequest)
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").attr("id") must be("global-header")
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
     }
 
     "have the expected elements on the form" in {
@@ -273,7 +300,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
 
-      document.getElementsByTag("header").attr("id") must be("global-header")
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
 
       withClue("result page title") {
         document.title() must be("Advice creation successful")

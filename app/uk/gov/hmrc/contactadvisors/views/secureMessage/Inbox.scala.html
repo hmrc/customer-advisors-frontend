@@ -40,12 +40,14 @@ content = Text("Message")
 
 @govukInput(
 Input(
+inputType = "hidden",
 label = Label(
 content = Text("Subject")
 )
 ).withFormField(adviceForm("subject")))
 
 @govukButton(Button(
+attributes = Map("id" -> "submit-advice"),
 content = Text("Send")
 ))
 

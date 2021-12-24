@@ -25,10 +25,10 @@
 @(adviceForm: Form[AdviceV2])(implicit  request: Request[_], messages: Messages, appConfig : uk.gov.hmrc.contactadvisors.FrontendAppConfig)
 
 
-@layout(pageTitle = None) {
+@layout(pageTitle = Some("Contact Advisor Response Form")) {
 
 
-<h1 class="govuk-heading-xl">Please complete and submit the form below in order to reply to </h1>
+<h2 class="govuk-heading-m">Please complete and submit the form below in order to reply to </h2>
 
 
 
@@ -37,8 +37,6 @@
 
 
 @govukTextarea(Textarea(
-id = "query.message",
-name = "query.message",
 label = Label(
 content = Text("Content")
 )
@@ -91,6 +89,7 @@ content = Text("MessageType")
 
 
 @govukButton(Button(
+attributes = Map("id" -> "submit-advice"),
 content = Text("Send")
 ))
 

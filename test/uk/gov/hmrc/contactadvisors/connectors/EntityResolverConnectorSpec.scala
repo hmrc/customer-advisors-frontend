@@ -17,20 +17,20 @@
 package uk.gov.hmrc.contactadvisors.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import javax.inject.{ Inject, Singleton }
+
+import javax.inject.{Inject, Singleton}
 import org.scalatest.Inside._
-import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
-import play.api.libs.json.{ JsObject, Json }
-import play.api.{ Configuration, Environment }
+import play.api.libs.json.{JsObject, Json}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.contactadvisors.domain.UnexpectedFailure
 import uk.gov.hmrc.domain.SaUtr
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.utils.WithWiremock
 
 @Singleton
@@ -39,7 +39,7 @@ class TestEntityResolverConnector @Inject()(
   val runModeConfiguration: Configuration,
   servicesConfig: ServicesConfig,
   val environment: Environment)
-    extends EntityResolverConnector(http, runModeConfiguration, servicesConfig, environment) {
+    extends EntityResolverConnector(http, servicesConfig) {
   override lazy val serviceUrl: String = s"http://localhost:8015"
 }
 

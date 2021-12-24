@@ -20,9 +20,9 @@
 
 @(utr: String)(implicit request: Request[_], messages: Messages, appConfig : uk.gov.hmrc.contactadvisors.FrontendAppConfig)
 
-@layout(pageTitle = None) {
+@layout(pageTitle = Some("Advice creation successful")) {
 
-<h1 class="govuk-heading-l">Reply to customer with SA-UTR @utr</h1>
+<h2 class="govuk-heading-m">Reply to customer with SA-UTR @utr</h2>
 
 
 
@@ -32,12 +32,13 @@
    Success
   </h2>
  </div>
- <div class="govuk-notification-banner__content">
-  <h3 class="govuk-notification-banner__heading">
-   Thanks. Your reply has been successfully received by the customer's Tax Account secure message Inbox.
-  </h3>
 
+ <div class="govuk-form-group govuk-form-group--error">
+  <p class="govuk-error-message">
+      Thanks. Your reply has been successfully received by the customer's Tax Account secure message Inbox.
+  </p>
  </div>
+
 </div>
 
 }

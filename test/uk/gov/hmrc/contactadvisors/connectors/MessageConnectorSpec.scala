@@ -21,19 +21,19 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import com.github.tomakehurst.wiremock.http.Fault
-import javax.inject.{ Inject, Singleton }
-import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
+
+import javax.inject.{Inject, Singleton}
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import org.scalatestplus.play.{ PlaySpec }
+import org.scalatestplus.play.PlaySpec
 import play.api.http.Status
 import play.api.libs.json.Json
-import play.api.{ Configuration, Environment }
-import uk.gov.hmrc.contactadvisors.domain.{ AdviceAlreadyExists, AdviceStored, UnexpectedError }
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.contactadvisors.domain.{AdviceAlreadyExists, AdviceStored, UnexpectedError}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
+import uk.gov.hmrc.utils.{SecureMessageCreator, WithWiremock}
 
 @Singleton
 class TestMessageConnector @Inject()(

@@ -35,29 +35,28 @@ import uk.gov.hmrc.play.audit.EventKeys
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{DataEvent, EventTypes}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.contactadvisors.views.html.{Home, secureMessage}
 
 
-
 @Singleton
 class SecureMessageController @Inject()(
   controllerComponents: MessagesControllerComponents,
+  customerAdviceAudit: CustomerAdviceAudit,
+  secureMessageService: SecureMessageService,
+  messagesApi: MessagesApi,
   inboxPage: Inbox,
+  inboxPageV2: InboxV2,
   successPage: Success,
   successPageV2: SuccessV2,
   duplicatePage: Duplicate,
   duplicatePageV2: DuplicateV2,
-  inboxPageV2: InboxV2,
   notPaperlessPage: Not_paperless,
-  customerAdviceAudit: CustomerAdviceAudit,
   unknownPage: Unknown,
-  unexpectedV2Page: UnexpectedV2,
   unexpectedPage: Unexpected,
-  secureMessageService: SecureMessageService,
-  messagesApi: MessagesApi)(implicit val appConfig: uk.gov.hmrc.contactadvisors.FrontendAppConfig)
+  unexpectedV2Page: UnexpectedV2
+  )(implicit val appConfig: uk.gov.hmrc.contactadvisors.FrontendAppConfig)
     extends FrontendController(controllerComponents) with I18nSupport with Logging {
 
 

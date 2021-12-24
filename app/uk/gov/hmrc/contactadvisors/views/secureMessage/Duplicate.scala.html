@@ -22,11 +22,14 @@
 
 @layout(pageTitle = Some("Advice already exists")) {
 
-<h1 class="govuk-heading-l">Reply to customer with SA-UTR @utr</h1>
+<h2 class="govuk-heading-m">Reply to customer with SA-UTR @utr</h2>
 
-<p class="govuk-error-message">
-    <span class="govuk-visually-hidden">Error:</span> This message appears to be a duplicate of a message already received in the customer's Tax Account secure message Inbox.
-</p>
+
+<div class="govuk-form-group govuk-form-group--error">
+ <p class="govuk-error-message">
+  This message appears to be a duplicate of a message already received in the customer's Tax Account secure message Inbox.
+ </p>
+</div>
 
 }
 

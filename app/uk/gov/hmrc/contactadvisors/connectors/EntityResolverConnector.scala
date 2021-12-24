@@ -29,10 +29,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class EntityResolverConnector @Inject()(http: HttpClient, runModeConfiguration: Configuration, servicesConfig: ServicesConfig, environment: Environment)
+class EntityResolverConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfig)
     extends Status {
 
-  lazy val serviceUrl: String = servicesConfig.baseUrl("entity-resolver")
+    lazy val serviceUrl = servicesConfig.baseUrl("entity-resolver")
 
   def validPaperlessUserWith(utr: SaUtr)(implicit hc: HeaderCarrier): Future[Option[PaperlessPreference]] = {
     implicit val preferenceFormats = PaperlessPreference.formats

@@ -34,7 +34,13 @@ class SecureMessageService @Inject()(messageConnector: MessageConnector, entityR
 
   def generateExternalRefID = UUID.randomUUID().toString
 
-  def createMessage(advice: Advice, saUtr: SaUtr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[StorageResult] =
+  def createMessage(advice: Advice, saUtr: SaUtr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[StorageResult] = {
+
+    val entty =  entityResolverConnector
+      .validPaperlessUserWith(saUtr)
+
+    Thread.sleep(2000)
+
     entityResolverConnector
       .validPaperlessUserWith(saUtr)
       .flatMap {
@@ -48,6 +54,7 @@ class SecureMessageService @Inject()(messageConnector: MessageConnector, entityR
       .recover {
         case UnexpectedFailure(reason) => UnexpectedError(s"Creation of the advice failed. Reason: $reason")
       }
+  }
 
   def secureMessageFrom(advice: Advice, saUtr: SaUtr): SecureMessage = {
     val recipient = Recipient(saUtr)
