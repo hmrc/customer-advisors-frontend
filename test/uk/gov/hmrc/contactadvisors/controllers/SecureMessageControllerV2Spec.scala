@@ -41,8 +41,8 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
 
   implicit lazy override val app: Application = new GuiceApplicationBuilder()
     .configure(
-      "Test.microservice.services.message.port"         -> "10100",
-      "Test.microservice.services.entity-resolver.port" -> "10100"
+      "microservice.services.message.port"         -> "10100",
+      "microservice.services.entity-resolver.port" -> "10100"
     )
     .build()
 
@@ -192,7 +192,8 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
           "messageType"                 -> messageType
         )
       )
-      Jsoup.parse(contentAsString(emptySubject)).getElementsByClass("error-notification").asScala must have size 1
+
+      Jsoup.parse(contentAsString(emptySubject)).getElementsByClass("govuk-error-message").asScala must have size 1
       status(emptySubject) must be(BAD_REQUEST)
 
       val emptyMessage = controller.submitV2()(
@@ -205,11 +206,13 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
           "messageType"                 -> messageType
         )
       )
-      Jsoup.parse(contentAsString(emptyMessage)).getElementsByClass("error-notification").asScala must have size 1
+
+      Jsoup.parse(contentAsString(emptyMessage)).getElementsByClass("govuk-error-message").asScala must have size 1
       status(emptyMessage) must be(BAD_REQUEST)
 
       val emptyFormFields = controller.submitV2()(FakeRequest())
-      Jsoup.parse(contentAsString(emptyFormFields)).getElementsByClass("error-notification").asScala must have size 7
+
+      Jsoup.parse(contentAsString(emptyFormFields)).getElementsByClass("govuk-form-group").asScala must have size 7
       status(emptyFormFields) must be(BAD_REQUEST)
     }
 
@@ -315,7 +318,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       contentType(result) must be(Some("text/html"))
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").attr("id") must be("global-header")
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
 
       withClue("result page title") {
         document.title() must be("Advice already exists")
@@ -328,7 +331,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       contentType(result) must be(Some("text/html"))
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").attr("id") must be("global-header")
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
 
       withClue("result page title") {
         document.title() must be("Unexpected error")

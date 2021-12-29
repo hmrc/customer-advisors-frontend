@@ -32,15 +32,9 @@ import scala.concurrent.{ ExecutionContext, Future }
 @Singleton
 class SecureMessageService @Inject()(messageConnector: MessageConnector, entityResolverConnector: EntityResolverConnector) {
 
-  def generateExternalRefID = UUID.randomUUID().toString
+  lazy val generateExternalRefID = UUID.randomUUID().toString
 
   def createMessage(advice: Advice, saUtr: SaUtr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[StorageResult] = {
-
-    val entty =  entityResolverConnector
-      .validPaperlessUserWith(saUtr)
-
-    Thread.sleep(2000)
-
     entityResolverConnector
       .validPaperlessUserWith(saUtr)
       .flatMap {

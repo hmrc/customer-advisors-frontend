@@ -18,7 +18,12 @@ package uk.gov.hmrc.contactadvisors.dependencies
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.Status
+import uk.gov.hmrc.contactadvisors.connectors.MessageResponse
 import uk.gov.hmrc.contactadvisors.connectors.models.SecureMessage
+import uk.gov.hmrc.http.HttpClient
+
+import java.util.UUID
+import javax.inject.Inject
 
 
 trait MessageStub {
@@ -51,7 +56,7 @@ trait MessageStub {
          |}
      """.stripMargin)
 
-  def givenMessageRespondsWith(request: SecureMessage, response: (Int, String)): Unit =
+  def givenMessageRespondsWith(exteranlRefId: String = UUID.randomUUID().toString, request: SecureMessage, response: (Int, String)): Unit = {
     givenThat(
       post(urlEqualTo(messageEndpoint))
         .withRequestBody(
@@ -65,6 +70,7 @@ trait MessageStub {
                |    }
                |  },
                |  "externalRef": {
+               |    "id":"$exteranlRefId",
                |    "source": "customer-advisor"
                |  },
                |  "messageType": "advisor-reply",
@@ -81,4 +87,5 @@ trait MessageStub {
           )
         )
         .willReturn(aResponse().withStatus(response._1).withBody(response._2)))
+  }
 }

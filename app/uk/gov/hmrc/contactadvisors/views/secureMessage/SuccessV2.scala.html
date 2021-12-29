@@ -21,9 +21,9 @@
 
 @()(implicit request: Request[_], messages: Messages, appConfig : uk.gov.hmrc.contactadvisors.FrontendAppConfig, flash: Flash)
 
-@layout(pageTitle = None) {
+@layout(pageTitle = Some("Advice creation successful")) {
 
-<h1 class="govuk-heading-l">Success</h1>
+<h2 class="govuk-heading-m">Success</h2>
 
 <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
     <div class="govuk-notification-banner__header">

@@ -38,10 +38,9 @@ import uk.gov.hmrc.utils.{SecureMessageCreator, WithWiremock}
 @Singleton
 class TestMessageConnector @Inject()(
   http: HttpClient,
-  override val runModeConfiguration: Configuration,
-  servicesConfig: ServicesConfig,
-  override val environment: Environment)
-    extends MessageConnector(http, runModeConfiguration, servicesConfig, environment) {
+  servicesConfig: ServicesConfig
+ )
+    extends MessageConnector(http, servicesConfig) {
 
   override lazy val serviceUrl: String = s"http://localhost:58008"
 }

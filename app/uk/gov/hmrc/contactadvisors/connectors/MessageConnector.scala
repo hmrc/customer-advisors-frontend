@@ -28,7 +28,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import scala.concurrent.Future
 
 @Singleton
-class MessageConnector @Inject()(http: HttpClient, val runModeConfiguration: Configuration, servicesConfig: ServicesConfig, val environment: Environment)
+class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfig)
     extends Status {
 
   lazy val serviceUrl: String = servicesConfig.baseUrl("message")

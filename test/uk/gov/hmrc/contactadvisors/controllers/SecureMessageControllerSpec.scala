@@ -49,8 +49,8 @@ class SecureMessageControllerSpec
 
   implicit lazy override val app: Application = new GuiceApplicationBuilder()
     .configure(
-      "Test.microservice.services.message.port"         -> "10100",
-             "Test.microservice.services.entity-resolver.port" -> "10100"
+      "microservice.services.message.port"         -> "10100",
+             "microservice.services.entity-resolver.port" -> "10100"
     )
     .build()
 
@@ -63,6 +63,7 @@ class SecureMessageControllerSpec
   val adviceBody = "<p>This is the content of the secure message</p>"
 
   val controllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+
   val customerAdviceAudit = app.injector.instanceOf[CustomerAdviceAudit]
   val secureMessageService = app.injector.instanceOf[SecureMessageService]
   val appConfig = app.injector.instanceOf[FrontendAppConfig]
@@ -77,8 +78,6 @@ class SecureMessageControllerSpec
   val unknownPage  = app.injector.instanceOf[Unknown]
   val unexpectedPage = app.injector.instanceOf[Unexpected]
   val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
-
-
   val controller = new SecureMessageController(
     controllerComponents,
     customerAdviceAudit,
@@ -97,6 +96,8 @@ class SecureMessageControllerSpec
   )(app.injector.instanceOf[FrontendAppConfig]) {
     def auditSource: String = "customer-advisors-frontend"
   }
+  val externalRefID = secureMessageService.generateExternalRefID
+
   "GET /inbox/:utr" should {
     "return 200" in {
       val result = controller.inbox(customer_utr)(getRequest)
@@ -241,7 +242,8 @@ class SecureMessageControllerSpec
           "message" -> "A message success to the customer. lkasdfjas;ldfjk"
         )
       )
-//      Jsoup.parse(contentAsString(emptySubject)).getElementsByClass("error-notification").asScala must have size 1
+
+     Jsoup.parse(contentAsString(emptySubject)).getElementsByClass("govuk-input govuk-input--error").asScala must have size 1
      status(emptySubject) must be(BAD_REQUEST)
 
       val emptyMessage = controller.submit(customer_utr)(
@@ -249,17 +251,19 @@ class SecureMessageControllerSpec
           "subject" -> "subject"
         )
       )
-//      Jsoup.parse(contentAsString(emptyMessage)).getElementsByClass("error-notification").asScala must have size 1
+
+      Jsoup.parse(contentAsString(emptyMessage)).getElementsByClass("govuk-textarea govuk-textarea--error").asScala must have size 1
       status(emptyMessage) must be(BAD_REQUEST)
 
-     val emptyFormFields = controller.submit(customer_utr)(FakeRequest())
-//      Jsoup.parse(contentAsString(emptyFormFields)).getElementsByClass("error-notification").asScala must have size 2
-        status(emptyFormFields) must be(BAD_REQUEST)
+      val emptyFormFields = controller.submit(customer_utr)(FakeRequest())
+
+       Jsoup.parse(contentAsString(emptyFormFields)).getElementsByClass("govuk-form-group").asScala must have size 2
+       status(emptyFormFields) must be(BAD_REQUEST)
     }
 
     "Leave script tags in the message and subject" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
-      givenMessageRespondsWith(SecureMessageCreator.uncleanMessage, successfulResponse)
+      givenMessageRespondsWith(externalRefID, SecureMessageCreator.uncleanMessage, successfulResponse)
 
       val xssMessage = controller.submit(utr.value)(
         FakeRequest().withFormUrlEncodedBody(
@@ -273,21 +277,23 @@ class SecureMessageControllerSpec
 
     "redirect to the success page when the form submission is successful" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
-      givenMessageRespondsWith(SecureMessageCreator.message, successfulResponse)
+
+      givenMessageRespondsWith(externalRefID, SecureMessageCreator.message, successfulResponse)
+
 
       submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/success"
     }
 
     "redirect and indicate a duplicate message submission" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
-      givenMessageRespondsWith(SecureMessageCreator.message, duplicatedMessage)
+      givenMessageRespondsWith(externalRefID, SecureMessageCreator.message, duplicatedMessage)
 
       submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/duplicate"
     }
 
     "redirect and indicate an unexpected error has occurred when processing the submission" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
-      givenMessageRespondsWith(SecureMessageCreator.message, unknownTaxId)
+      givenMessageRespondsWith(externalRefID, SecureMessageCreator.message, unknownTaxId)
 
       submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/unexpected"
     }
