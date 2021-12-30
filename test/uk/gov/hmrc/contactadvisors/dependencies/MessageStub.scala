@@ -25,7 +25,6 @@ import uk.gov.hmrc.http.HttpClient
 import java.util.UUID
 import javax.inject.Inject
 
-
 trait MessageStub {
   val messageEndpoint = "/messages"
 
@@ -56,7 +55,7 @@ trait MessageStub {
          |}
      """.stripMargin)
 
-  def givenMessageRespondsWith(exteranlRefId: String = UUID.randomUUID().toString, request: SecureMessage, response: (Int, String)): Unit = {
+  def givenMessageRespondsWith(exteranlRefId: String = UUID.randomUUID().toString, request: SecureMessage, response: (Int, String)): Unit =
     givenThat(
       post(urlEqualTo(messageEndpoint))
         .withRequestBody(
@@ -87,5 +86,4 @@ trait MessageStub {
           )
         )
         .willReturn(aResponse().withStatus(response._1).withBody(response._2)))
-  }
 }

@@ -16,20 +16,19 @@
 
 package uk.gov.hmrc.contactadvisors.connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.libs.json.Json
-import play.api.{Configuration, Environment}
+import play.api.{ Configuration, Environment }
 import play.mvc.Http.Status
-import uk.gov.hmrc.contactadvisors.connectors.models.{ExternalReference, ExternalReferenceV2, SecureMessage, SecureMessageV2}
+import uk.gov.hmrc.contactadvisors.connectors.models.{ ExternalReference, ExternalReferenceV2, SecureMessage, SecureMessageV2 }
 import uk.gov.hmrc.contactadvisors.domain._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, Upstream4xxResponse}
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, Upstream4xxResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.Future
 
 @Singleton
-class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfig)
-    extends Status {
+class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfig) extends Status {
 
   lazy val serviceUrl: String = servicesConfig.baseUrl("message")
 

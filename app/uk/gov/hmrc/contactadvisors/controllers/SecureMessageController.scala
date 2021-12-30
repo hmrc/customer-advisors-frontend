@@ -19,27 +19,25 @@ package uk.gov.hmrc.contactadvisors.controllers
 import play.api.Logging
 
 import java.util.UUID
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.Lang.logger
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
 import uk.gov.hmrc.contactadvisors.connectors.models.ExternalReferenceV2
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown}
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.EventKeys
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.audit.model.{DataEvent, EventTypes}
+import uk.gov.hmrc.play.audit.model.{ DataEvent, EventTypes }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.contactadvisors.views.html.{Home, secureMessage}
-
-
+import uk.gov.hmrc.contactadvisors.views.html.{ Home, secureMessage }
 @Singleton
 class SecureMessageController @Inject()(
   controllerComponents: MessagesControllerComponents,
@@ -56,9 +54,8 @@ class SecureMessageController @Inject()(
   unknownPage: Unknown,
   unexpectedPage: Unexpected,
   unexpectedV2Page: UnexpectedV2
-  )(implicit val appConfig: uk.gov.hmrc.contactadvisors.FrontendAppConfig)
+)(implicit val appConfig: uk.gov.hmrc.contactadvisors.FrontendAppConfig)
     extends FrontendController(controllerComponents) with I18nSupport with Logging {
-
 
   def inbox(utr: String) = Action.async { implicit request =>
     Future.successful(
@@ -74,8 +71,7 @@ class SecureMessageController @Inject()(
   def inboxV2 = Action.async { implicit request =>
     Future.successful(
       Ok(
-        inboxPageV2(adviceFormV2.fill(AdviceV2("", "", "", "", "", "", ""))
-        )
+        inboxPageV2(adviceFormV2.fill(AdviceV2("", "", "", "", "", "", "")))
       )
     )
   }

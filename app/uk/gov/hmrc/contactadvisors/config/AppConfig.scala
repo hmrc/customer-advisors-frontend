@@ -18,13 +18,12 @@ package uk.gov.hmrc.contactadvisors.config
 
 import play.api.Configuration
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 
 @Singleton
-class AppConfig @Inject()
-  (
-    config: Configuration
-  ) {
+class AppConfig @Inject()(
+  config: Configuration
+) {
   val welshLanguageSupportEnabled: Boolean = config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
 
 }

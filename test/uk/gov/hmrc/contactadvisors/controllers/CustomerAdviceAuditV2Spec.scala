@@ -19,25 +19,25 @@ package uk.gov.hmrc.contactadvisors.controllers
 import org.mockito.ArgumentCaptor
 import org.scalatest.matchers.must.Matchers
 import org.mockito.Mockito._
-import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.{ Eventually, IntegrationPatience, ScalaFutures }
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.MessagesApi
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
-import play.api.{Configuration, Environment}
+import play.api.{ Configuration, Environment }
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown}
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.EventKeys
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
+import uk.gov.hmrc.play.audit.http.connector.{ AuditConnector, AuditResult }
 import uk.gov.hmrc.play.audit.model.DataEvent
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.{ verify, when }
 import org.scalatestplus.mockito.MockitoSugar.mock
 import scala.concurrent.Future
 
@@ -246,11 +246,12 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     val duplicatePage = app.injector.instanceOf[Duplicate]
     val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
     val notPaperlessPage = app.injector.instanceOf[Not_paperless]
-    val unknownPage  = app.injector.instanceOf[Unknown]
+    val unknownPage = app.injector.instanceOf[Unknown]
     val unexpectedPage = app.injector.instanceOf[Unexpected]
     val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
 
-    val controller = new SecureMessageController(controllerComponents,
+    val controller = new SecureMessageController(
+      controllerComponents,
       customerAdviceAudit,
       secureMessageServiceMock,
       messageApi,

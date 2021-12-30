@@ -21,7 +21,7 @@ import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.Inside
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.play.PlaySpec
@@ -29,17 +29,17 @@ import play.api.Application
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{MessagesControllerComponents, Result}
+import play.api.mvc.{ MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
-import uk.gov.hmrc.contactadvisors.dependencies.{EntityResolverStub, MessageStub}
-import uk.gov.hmrc.contactadvisors.domain.{AdviceStored, StorageResult}
+import uk.gov.hmrc.contactadvisors.dependencies.{ EntityResolverStub, MessageStub }
+import uk.gov.hmrc.contactadvisors.domain.{ AdviceStored, StorageResult }
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown}
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.utils.{SecureMessageCreator, WithWiremock}
+import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -50,7 +50,7 @@ class SecureMessageControllerSpec
   implicit lazy override val app: Application = new GuiceApplicationBuilder()
     .configure(
       "microservice.services.message.port"         -> "10100",
-             "microservice.services.entity-resolver.port" -> "10100"
+      "microservice.services.entity-resolver.port" -> "10100"
     )
     .build()
 
@@ -75,7 +75,7 @@ class SecureMessageControllerSpec
   val duplicatePage = app.injector.instanceOf[Duplicate]
   val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
   val notPaperlessPage = app.injector.instanceOf[Not_paperless]
-  val unknownPage  = app.injector.instanceOf[Unknown]
+  val unknownPage = app.injector.instanceOf[Unknown]
   val unexpectedPage = app.injector.instanceOf[Unexpected]
   val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
   val controller = new SecureMessageController(
@@ -243,8 +243,8 @@ class SecureMessageControllerSpec
         )
       )
 
-     Jsoup.parse(contentAsString(emptySubject)).getElementsByClass("govuk-input govuk-input--error").asScala must have size 1
-     status(emptySubject) must be(BAD_REQUEST)
+      Jsoup.parse(contentAsString(emptySubject)).getElementsByClass("govuk-input govuk-input--error").asScala must have size 1
+      status(emptySubject) must be(BAD_REQUEST)
 
       val emptyMessage = controller.submit(customer_utr)(
         FakeRequest().withFormUrlEncodedBody(
@@ -257,8 +257,8 @@ class SecureMessageControllerSpec
 
       val emptyFormFields = controller.submit(customer_utr)(FakeRequest())
 
-       Jsoup.parse(contentAsString(emptyFormFields)).getElementsByClass("govuk-form-group").asScala must have size 2
-       status(emptyFormFields) must be(BAD_REQUEST)
+      Jsoup.parse(contentAsString(emptyFormFields)).getElementsByClass("govuk-form-group").asScala must have size 2
+      status(emptyFormFields) must be(BAD_REQUEST)
     }
 
     "Leave script tags in the message and subject" in {
@@ -279,7 +279,6 @@ class SecureMessageControllerSpec
       givenEntityResolverReturnsAPaperlessUser(utr.value)
 
       givenMessageRespondsWith(externalRefID, SecureMessageCreator.message, successfulResponse)
-
 
       submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/success"
     }

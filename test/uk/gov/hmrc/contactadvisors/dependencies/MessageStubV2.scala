@@ -61,7 +61,7 @@ trait MessageStubV2 {
          |}
      """.stripMargin)
 
-  def givenMessageRespondsWith(externalRefId: String, advice: AdviceV2, response: (Int, String)): Unit = {
+  def givenMessageRespondsWith(externalRefId: String, advice: AdviceV2, response: (Int, String)): Unit =
     givenThat(
       post(urlEqualTo(messageEndpoint))
         .withRequestBody(
@@ -92,7 +92,6 @@ trait MessageStubV2 {
             }
           )
         )
-     //   .withRequestBody(matchingJsonPath("$.externalRef.id"))
+        //   .withRequestBody(matchingJsonPath("$.externalRef.id"))
         .willReturn(aResponse().withStatus(response._1).withBody(response._2)))
-  }
 }

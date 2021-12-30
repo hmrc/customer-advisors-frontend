@@ -18,21 +18,21 @@ package uk.gov.hmrc.contactadvisors.controllers
 
 import org.jsoup.Jsoup
 import org.scalatest.Inside
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{MessagesControllerComponents, Result}
+import play.api.mvc.{ MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.dependencies.MessageStubV2
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown}
-import uk.gov.hmrc.utils.{SecureMessageCreatorV2, WithWiremock}
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
+import uk.gov.hmrc.utils.{ SecureMessageCreatorV2, WithWiremock }
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -69,13 +69,14 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
   val duplicatePage = app.injector.instanceOf[Duplicate]
   val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
   val notPaperlessPage = app.injector.instanceOf[Not_paperless]
-  val unknownPage  = app.injector.instanceOf[Unknown]
+  val unknownPage = app.injector.instanceOf[Unknown]
   val unexpectedPage = app.injector.instanceOf[Unexpected]
   val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
 
   val externalRefID = secureMessageService.generateExternalRefID
 
-  val controller = new SecureMessageController(controllerComponents,
+  val controller = new SecureMessageController(
+    controllerComponents,
     customerAdviceAudit,
     secureMessageService,
     messageApi,
