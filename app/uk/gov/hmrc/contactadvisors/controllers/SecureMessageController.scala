@@ -107,9 +107,7 @@ class SecureMessageController @Inject()(
               }
           ),
           advice => {
-            def generateExternalRefID = UUID.randomUUID().toString
-
-            val externalReference = ExternalReferenceV2(generateExternalRefID)
+            val externalReference = ExternalReferenceV2(secureMessageService.generateExternalRefID)
             val result = secureMessageService.createMessageV2(advice, externalReference)
             customerAdviceAudit.auditAdviceV2(result, advice, externalReference)
             result.map {

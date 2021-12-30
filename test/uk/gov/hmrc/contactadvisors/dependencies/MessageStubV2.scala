@@ -37,6 +37,7 @@ import org.apache.commons.codec.binary.Base64
 import org.joda.time.DateTime
 import org.skyscreamer.jsonassert.JSONCompareMode
 import play.api.http.Status
+import uk.gov.hmrc.contactadvisors.connectors.models.ExternalReferenceV2
 import uk.gov.hmrc.contactadvisors.domain.AdviceV2
 
 trait MessageStubV2 {
@@ -60,7 +61,7 @@ trait MessageStubV2 {
          |}
      """.stripMargin)
 
-  def givenMessageRespondsWith(advice: AdviceV2, response: (Int, String)): Unit =
+  def givenMessageRespondsWith(externalRefId: String, advice: AdviceV2, response: (Int, String)): Unit = {
     givenThat(
       post(urlEqualTo(messageEndpoint))
         .withRequestBody(
@@ -78,6 +79,7 @@ trait MessageStubV2 {
                  |  "email":"${advice.recipientEmail}"},
                  | "externalRef":
                  | {
+                 |  "id":"$externalRefId",
                  |  "source":"sees"
                  | },
                  | "messageType":"${advice.messageType}",
@@ -90,6 +92,7 @@ trait MessageStubV2 {
             }
           )
         )
-        .withRequestBody(matchingJsonPath("$.externalRef.id"))
+     //   .withRequestBody(matchingJsonPath("$.externalRef.id"))
         .willReturn(aResponse().withStatus(response._1).withBody(response._2)))
+  }
 }

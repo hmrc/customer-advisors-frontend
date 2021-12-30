@@ -49,6 +49,8 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
       when(secureMessageServiceMock.createMessageV2(any(), any())(any(), any()))
         .thenReturn(Future.successful(AdviceStored("1234")))
 
+      when(secureMessageServiceMock.generateExternalRefID).thenReturn("75d80f37-2cb4-4571-a100-5f8511986fb7")
+
       controller.submitV2()(request).futureValue
 
       eventually {
@@ -105,7 +107,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     "audit the duplicate message event" in new TestCaseV2 {
       when(secureMessageServiceMock.createMessageV2(any(), any())(any(), any()))
         .thenReturn(Future.successful(AdviceAlreadyExists))
-
+      when(secureMessageServiceMock.generateExternalRefID).thenReturn("75d80f37-2cb4-4571-a100-5f8511986fb7")
       controller.submitV2()(request).futureValue
 
       eventually {
@@ -163,7 +165,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     "audit the unexpected error event" in new TestCaseV2 {
       when(secureMessageServiceMock.createMessageV2(any(), any())(any(), any()))
         .thenReturn(Future.successful(UnexpectedError("this is the reason")))
-
+      when(secureMessageServiceMock.generateExternalRefID).thenReturn("75d80f37-2cb4-4571-a100-5f8511986fb7")
       controller.submitV2()(request).futureValue
 
       eventually {
@@ -226,13 +228,13 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
   }
 
   trait TestCaseV2 {
-    val secureMessageServiceMock = mock[SecureMessageService]
-    val customerAdviceAuditMock = new CustomerAdviceAudit(auditConnectorMock)
-
-    val env = Environment.simple()
-    val configuration = Configuration.reference ++ Configuration.from(Map("Test.google-analytics.token" -> "token", "Test.google-analytics.host" -> "host"))
-
     val auditConnectorMock = mock[AuditConnector]
+    val secureMessageServiceMock = mock[SecureMessageService]
+
+    val customerAdviceAuditMock = new CustomerAdviceAudit(auditConnectorMock)
+    val env = Environment.simple()
+
+    val configuration = Configuration.reference ++ Configuration.from(Map("Test.google-analytics.token" -> "token", "Test.google-analytics.host" -> "host"))
     val customerAdviceAudit = new CustomerAdviceAudit(auditConnectorMock)
     val appConfig = app.injector.instanceOf[FrontendAppConfig]
     val controllerComponents = app.injector.instanceOf[MessagesControllerComponents]

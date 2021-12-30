@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.{Configuration, Environment}
 import play.mvc.Http.Status
-import uk.gov.hmrc.contactadvisors.connectors.models.{SecureMessage, SecureMessageV2}
+import uk.gov.hmrc.contactadvisors.connectors.models.{ExternalReference, ExternalReferenceV2, SecureMessage, SecureMessageV2}
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, Upstream4xxResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig

@@ -19,7 +19,7 @@ object AppDependencies {
 
 
 
-
+    "com.vladsch.flexmark" % "flexmark-all" % "0.35.10",
 
 
 

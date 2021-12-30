@@ -73,7 +73,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
   val unexpectedPage = app.injector.instanceOf[Unexpected]
   val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
 
-
+  val externalRefID = secureMessageService.generateExternalRefID
 
   val controller = new SecureMessageController(controllerComponents,
     customerAdviceAudit,
@@ -219,7 +219,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
     "redirect to the success page when the form submission is successful" in {
       val advice = SecureMessageCreatorV2.adviceWithUncleanContent
 
-      givenMessageRespondsWith(advice, successfulResponse)
+      givenMessageRespondsWith(externalRefID, advice, successfulResponse)
 
       val xssMessage = controller.submitV2()(
         FakeRequest().withFormUrlEncodedBody(
@@ -238,7 +238,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
     "Leave script tags in the message and subject" in {
       val advice = SecureMessageCreatorV2.adviceWithUncleanContent
 
-      givenMessageRespondsWith(advice, successfulResponse)
+      givenMessageRespondsWith(externalRefID, advice, successfulResponse)
 
       val xssMessage = controller.submitV2()(
         FakeRequest().withFormUrlEncodedBody(
@@ -257,7 +257,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
 
     "redirect and indicate a duplicate message submission" in {
       val advice = SecureMessageCreatorV2.adviceWithCleanContent
-      givenMessageRespondsWith(advice, duplicatedMessage)
+      givenMessageRespondsWith(externalRefID, advice, duplicatedMessage)
 
       val xssMessage = controller.submitV2()(
         FakeRequest().withFormUrlEncodedBody(
@@ -276,7 +276,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
 
     "redirect and indicate an unexpected error has occurred when processing the submission" in {
       val advice = SecureMessageCreatorV2.adviceWithCleanContent
-      givenMessageRespondsWith(advice, (1, "asdfasdf"))
+      givenMessageRespondsWith(externalRefID, advice, (1, "asdfasdf"))
 
       val xssMessage = controller.submitV2()(
         FakeRequest().withFormUrlEncodedBody(
