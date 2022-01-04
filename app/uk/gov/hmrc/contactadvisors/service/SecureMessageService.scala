@@ -32,7 +32,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 @Singleton
 class SecureMessageService @Inject()(messageConnector: MessageConnector, entityResolverConnector: EntityResolverConnector) {
 
-  val generateExternalRefID = UUID.randomUUID().toString
+  def generateExternalRefID: String = UUID.randomUUID().toString
 
   def createMessage(advice: Advice, saUtr: SaUtr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[StorageResult] =
     entityResolverConnector

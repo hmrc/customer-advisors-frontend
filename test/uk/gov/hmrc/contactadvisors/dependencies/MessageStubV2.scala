@@ -66,32 +66,29 @@ trait MessageStubV2 {
       post(urlEqualTo(messageEndpoint))
         .withRequestBody(
           equalToJson(
-            {
-              s"""
-                 |{"recipient":
-                 | {"taxIdentifier":
-                 |  {
-                 |   "name":"${advice.recipientTaxidentifierName}",
-                 |   "value":"${advice.recipientTaxidentifierValue}"
-                 |  },
-                 |  "name":
-                 |  {"line1":"${advice.recipientNameLine1}"},
-                 |  "email":"${advice.recipientEmail}"},
-                 | "externalRef":
-                 | {
-                 |  "id":"$externalRefId",
-                 |  "source":"sees"
-                 | },
-                 | "messageType":"${advice.messageType}",
-                 | "subject":"${advice.subject}",
-                 | "content":"${new String(Base64.encodeBase64(advice.content.getBytes("UTF-8")))}",
-                 | "validFrom":"${DateTime.now().toLocalDate}",
-                 | "alertQueue":"PRIORITY"
-                 |}
-         """.stripMargin
-            }
+            s"""
+               |{"recipient":
+               | {"taxIdentifier":
+               |  {
+               |   "name":"${advice.recipientTaxidentifierName}",
+               |   "value":"${advice.recipientTaxidentifierValue}"
+               |  },
+               |  "name":
+               |  {"line1":"${advice.recipientNameLine1}"},
+               |  "email":"${advice.recipientEmail}"},
+               | "externalRef":
+               | {
+               |  "source":"sees"
+               | },
+               | "messageType":"${advice.messageType}",
+               | "subject":"${advice.subject}",
+               | "content":"${new String(Base64.encodeBase64(advice.content.getBytes("UTF-8")))}",
+               | "validFrom":"${DateTime.now().toLocalDate}",
+               | "alertQueue":"PRIORITY"
+               |}
+         """.stripMargin,
+            JSONCompareMode.LENIENT
           )
         )
-        //   .withRequestBody(matchingJsonPath("$.externalRef.id"))
         .willReturn(aResponse().withStatus(response._1).withBody(response._2)))
 }

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.contactadvisors.dependencies
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import org.skyscreamer.jsonassert.JSONCompareMode
 import play.api.http.Status
 import uk.gov.hmrc.contactadvisors.connectors.MessageResponse
 import uk.gov.hmrc.contactadvisors.connectors.models.SecureMessage
@@ -69,7 +70,6 @@ trait MessageStub {
                |    }
                |  },
                |  "externalRef": {
-               |    "id":"$exteranlRefId",
                |    "source": "customer-advisor"
                |  },
                |  "messageType": "advisor-reply",
@@ -82,7 +82,8 @@ trait MessageStub {
                |    "paperSent": ${request.details.paperSent}
                |  }
                |}
-         """.stripMargin
+         """.stripMargin,
+            JSONCompareMode.LENIENT
           )
         )
         .willReturn(aResponse().withStatus(response._1).withBody(response._2)))
