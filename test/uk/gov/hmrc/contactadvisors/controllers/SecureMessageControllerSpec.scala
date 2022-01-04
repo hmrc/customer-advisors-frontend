@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -313,7 +313,7 @@ class SecureMessageControllerSpec
 
   "submission result page" should {
     "contain correct message for success" in {
-      controller.success(utr.value)(getRequest) shouldContainPageWithTitleAndMessage (
+      controller.success(utr.value)(getRequest) shouldContainPageWithTitleAndSuccessMessage (
         "Advice creation successful", utr.value,
         "Thanks. Your reply has been successfully received by the customer's Tax Account secure message Inbox."
       )
@@ -374,6 +374,30 @@ class SecureMessageControllerSpec
         creationResult.get(0).text() must be(message)
       }
     }
+
+    def shouldContainPageWithTitleAndSuccessMessage(title: String, utr: String, message: String) = {
+      status(result) must be(200)
+      contentType(result) must be(Some("text/html"))
+      charset(result) must be(Some("utf-8"))
+
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
+
+      withClue("result page title") {
+        document.title() must be(title)
+      }
+
+      withClue("result page header") {
+        document.select("h2").text().trim must include(s"Reply to customer with SA-UTR $utr")
+      }
+
+      withClue("result message") {
+        val creationResult = document.select("h3.govuk-notification-banner__heading")
+        creationResult must have size 1
+        creationResult.get(0).text() must be(message)
+      }
+    }
+
   }
 
   implicit class ReturnsRedirectTo(result: Future[Result]) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -340,6 +340,34 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       withClue("result page h2") {
         document.select("h2").text().trim must include(s"Failed")
       }
+    }
+  }
+  "Unexpected page" must {
+    "include taxId" in {
+      val request = FakeRequest("GET", "/customer-advisors-frontend/inbox/unexpected").withFlash(("taxid", "123456789"))
+      val result = controller.unexpectedV2()(request)
+      contentAsString(result) must include("123456789")
+    }
+  }
+
+  "SuccessV2 page" must {
+    "include taxId, messageId and externalRef" in {
+      val request =
+        FakeRequest("GET", "/customer-advisors-frontend/inbox/success").withFlash(("taxid", "123456789"), ("messageId", "8888"), ("externalRef", "9999"))
+      val result = controller.successV2()(request)
+      val pageContent = contentAsString(result)
+      pageContent must include("123456789")
+      pageContent must include("8888")
+      pageContent must include("9999")
+    }
+  }
+
+  "DuplicateV2 page" must {
+    "include taxId" in {
+      val request = FakeRequest("GET", "/customer-advisors-frontend/inbox/duplicate").withFlash(("taxid", "123456789"))
+      val result = controller.duplicateV2()(request)
+      val pageContent = contentAsString(result)
+      pageContent must include("123456789")
     }
   }
 
