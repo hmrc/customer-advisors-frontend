@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.dependencies.MessageStubV2
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
 import uk.gov.hmrc.utils.{ SecureMessageCreatorV2, WithWiremock }
 
 import scala.collection.JavaConverters._
@@ -40,8 +41,8 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
 
   implicit lazy override val app: Application = new GuiceApplicationBuilder()
     .configure(
-      "Test.microservice.services.message.port"         -> "10100",
-      "Test.microservice.services.entity-resolver.port" -> "10100"
+      "microservice.services.message.port"         -> "10100",
+      "microservice.services.entity-resolver.port" -> "10100"
     )
     .build()
 
@@ -61,8 +62,35 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
   val messageApi = app.injector.instanceOf[MessagesApi]
   val customerAdviceAudit = app.injector.instanceOf[CustomerAdviceAudit]
   val secureMessageService = app.injector.instanceOf[SecureMessageService]
+  val inboxPage = app.injector.instanceOf[Inbox]
+  val inboxPageV2 = app.injector.instanceOf[InboxV2]
+  val successPage = app.injector.instanceOf[Success]
+  val successPageV2 = app.injector.instanceOf[SuccessV2]
+  val duplicatePage = app.injector.instanceOf[Duplicate]
+  val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
+  val notPaperlessPage = app.injector.instanceOf[Not_paperless]
+  val unknownPage = app.injector.instanceOf[Unknown]
+  val unexpectedPage = app.injector.instanceOf[Unexpected]
+  val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
 
-  val controller = new SecureMessageController(controllerComponents, customerAdviceAudit, secureMessageService, messageApi)(appConfig) {
+  val externalRefID = secureMessageService.generateExternalRefID
+
+  val controller = new SecureMessageController(
+    controllerComponents,
+    customerAdviceAudit,
+    secureMessageService,
+    messageApi,
+    inboxPage,
+    inboxPageV2,
+    successPage,
+    successPageV2,
+    duplicatePage,
+    duplicatePageV2,
+    notPaperlessPage,
+    unknownPage,
+    unexpectedPage,
+    unexpectedV2Page
+  )(appConfig) {
     def auditSource: String = "customer-advisors-frontend"
   }
 
@@ -81,7 +109,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
     "show main banner" in {
       val result = controller.inboxV2()(getRequest)
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").attr("id") must be("global-header")
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
     }
 
     "have the expected elements on the form" in {
@@ -165,7 +193,8 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
           "messageType"                 -> messageType
         )
       )
-      Jsoup.parse(contentAsString(emptySubject)).getElementsByClass("error-notification").asScala must have size 1
+
+      Jsoup.parse(contentAsString(emptySubject)).getElementsByClass("govuk-error-message").asScala must have size 1
       status(emptySubject) must be(BAD_REQUEST)
 
       val emptyMessage = controller.submitV2()(
@@ -178,18 +207,20 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
           "messageType"                 -> messageType
         )
       )
-      Jsoup.parse(contentAsString(emptyMessage)).getElementsByClass("error-notification").asScala must have size 1
+
+      Jsoup.parse(contentAsString(emptyMessage)).getElementsByClass("govuk-error-message").asScala must have size 1
       status(emptyMessage) must be(BAD_REQUEST)
 
       val emptyFormFields = controller.submitV2()(FakeRequest())
-      Jsoup.parse(contentAsString(emptyFormFields)).getElementsByClass("error-notification").asScala must have size 7
+
+      Jsoup.parse(contentAsString(emptyFormFields)).getElementsByClass("govuk-form-group").asScala must have size 7
       status(emptyFormFields) must be(BAD_REQUEST)
     }
 
     "redirect to the success page when the form submission is successful" in {
       val advice = SecureMessageCreatorV2.adviceWithUncleanContent
 
-      givenMessageRespondsWith(advice, successfulResponse)
+      givenMessageRespondsWith(externalRefID, advice, successfulResponse)
 
       val xssMessage = controller.submitV2()(
         FakeRequest().withFormUrlEncodedBody(
@@ -208,7 +239,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
     "Leave script tags in the message and subject" in {
       val advice = SecureMessageCreatorV2.adviceWithUncleanContent
 
-      givenMessageRespondsWith(advice, successfulResponse)
+      givenMessageRespondsWith(externalRefID, advice, successfulResponse)
 
       val xssMessage = controller.submitV2()(
         FakeRequest().withFormUrlEncodedBody(
@@ -227,7 +258,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
 
     "redirect and indicate a duplicate message submission" in {
       val advice = SecureMessageCreatorV2.adviceWithCleanContent
-      givenMessageRespondsWith(advice, duplicatedMessage)
+      givenMessageRespondsWith(externalRefID, advice, duplicatedMessage)
 
       val xssMessage = controller.submitV2()(
         FakeRequest().withFormUrlEncodedBody(
@@ -246,7 +277,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
 
     "redirect and indicate an unexpected error has occurred when processing the submission" in {
       val advice = SecureMessageCreatorV2.adviceWithCleanContent
-      givenMessageRespondsWith(advice, (1, "asdfasdf"))
+      givenMessageRespondsWith(externalRefID, advice, (1, "asdfasdf"))
 
       val xssMessage = controller.submitV2()(
         FakeRequest().withFormUrlEncodedBody(
@@ -273,7 +304,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
 
-      document.getElementsByTag("header").attr("id") must be("global-header")
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
 
       withClue("result page title") {
         document.title() must be("Advice creation successful")
@@ -288,7 +319,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       contentType(result) must be(Some("text/html"))
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").attr("id") must be("global-header")
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
 
       withClue("result page title") {
         document.title() must be("Advice already exists")
@@ -301,7 +332,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       contentType(result) must be(Some("text/html"))
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").attr("id") must be("global-header")
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
 
       withClue("result page title") {
         document.title() must be("Unexpected error")
@@ -309,6 +340,34 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       withClue("result page h2") {
         document.select("h2").text().trim must include(s"Failed")
       }
+    }
+  }
+  "Unexpected page" must {
+    "include taxId" in {
+      val request = FakeRequest("GET", "/customer-advisors-frontend/inbox/unexpected").withFlash(("taxid", "123456789"))
+      val result = controller.unexpectedV2()(request)
+      contentAsString(result) must include("123456789")
+    }
+  }
+
+  "SuccessV2 page" must {
+    "include taxId, messageId and externalRef" in {
+      val request =
+        FakeRequest("GET", "/customer-advisors-frontend/inbox/success").withFlash(("taxid", "123456789"), ("messageId", "8888"), ("externalRef", "9999"))
+      val result = controller.successV2()(request)
+      val pageContent = contentAsString(result)
+      pageContent must include("123456789")
+      pageContent must include("8888")
+      pageContent must include("9999")
+    }
+  }
+
+  "DuplicateV2 page" must {
+    "include taxId" in {
+      val request = FakeRequest("GET", "/customer-advisors-frontend/inbox/duplicate").withFlash(("taxid", "123456789"))
+      val result = controller.duplicateV2()(request)
+      val pageContent = contentAsString(result)
+      pageContent must include("123456789")
     }
   }
 

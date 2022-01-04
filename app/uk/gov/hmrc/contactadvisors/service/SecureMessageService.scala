@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 @Singleton
 class SecureMessageService @Inject()(messageConnector: MessageConnector, entityResolverConnector: EntityResolverConnector) {
 
-  def generateExternalRefID = UUID.randomUUID().toString
+  def generateExternalRefID: String = UUID.randomUUID().toString
 
   def createMessage(advice: Advice, saUtr: SaUtr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[StorageResult] =
     entityResolverConnector

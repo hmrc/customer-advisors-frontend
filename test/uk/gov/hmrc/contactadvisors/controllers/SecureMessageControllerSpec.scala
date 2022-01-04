@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package uk.gov.hmrc.contactadvisors.controllers
 
 import java.util.UUID
-
 import org.jsoup.Jsoup
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalatest.Inside
 import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
+import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.play.PlaySpec
 import play.api.Application
@@ -32,8 +34,11 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.dependencies.{ EntityResolverStub, MessageStub }
+import uk.gov.hmrc.contactadvisors.domain.{ AdviceStored, StorageResult }
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
 import uk.gov.hmrc.domain.SaUtr
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
 
 import scala.collection.JavaConverters._
@@ -44,8 +49,8 @@ class SecureMessageControllerSpec
 
   implicit lazy override val app: Application = new GuiceApplicationBuilder()
     .configure(
-      "Test.microservice.services.message.port"         -> "10100",
-      "Test.microservice.services.entity-resolver.port" -> "10100"
+      "microservice.services.message.port"         -> "10100",
+      "microservice.services.entity-resolver.port" -> "10100"
     )
     .build()
 
@@ -57,14 +62,42 @@ class SecureMessageControllerSpec
   val subject = "This is a response to your HMRC request"
   val adviceBody = "<p>This is the content of the secure message</p>"
 
+  val controllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+
+  val customerAdviceAudit = app.injector.instanceOf[CustomerAdviceAudit]
+  val secureMessageService = app.injector.instanceOf[SecureMessageService]
+  val appConfig = app.injector.instanceOf[FrontendAppConfig]
+  val messageApi = app.injector.instanceOf[MessagesApi]
+  val inboxPage = app.injector.instanceOf[Inbox]
+  val inboxPageV2 = app.injector.instanceOf[InboxV2]
+  val successPage = app.injector.instanceOf[Success]
+  val successPageV2 = app.injector.instanceOf[SuccessV2]
+  val duplicatePage = app.injector.instanceOf[Duplicate]
+  val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
+  val notPaperlessPage = app.injector.instanceOf[Not_paperless]
+  val unknownPage = app.injector.instanceOf[Unknown]
+  val unexpectedPage = app.injector.instanceOf[Unexpected]
+  val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
   val controller = new SecureMessageController(
-    app.injector.instanceOf[MessagesControllerComponents],
-    app.injector.instanceOf[CustomerAdviceAudit],
-    app.injector.instanceOf[SecureMessageService],
-    app.injector.instanceOf[MessagesApi]
+    controllerComponents,
+    customerAdviceAudit,
+    secureMessageService,
+    messageApi,
+    inboxPage,
+    inboxPageV2,
+    successPage,
+    successPageV2,
+    duplicatePage,
+    duplicatePageV2,
+    notPaperlessPage,
+    unknownPage,
+    unexpectedPage,
+    unexpectedV2Page
   )(app.injector.instanceOf[FrontendAppConfig]) {
     def auditSource: String = "customer-advisors-frontend"
   }
+  val externalRefID = secureMessageService.generateExternalRefID
+
   "GET /inbox/:utr" should {
     "return 200" in {
       val result = controller.inbox(customer_utr)(getRequest)
@@ -80,7 +113,7 @@ class SecureMessageControllerSpec
     "show main banner" in {
       val result = controller.inbox(customer_utr)(getRequest)
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").attr("id") must be("global-header")
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
     }
 
     "have the expected elements on the form" in {
@@ -130,7 +163,7 @@ class SecureMessageControllerSpec
     "show main banner" in {
       val result = controller.inboxV2()(getRequest)
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").attr("id") must be("global-header")
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
     }
 
     "have the expected elements on the form" in {
@@ -209,7 +242,8 @@ class SecureMessageControllerSpec
           "message" -> "A message success to the customer. lkasdfjas;ldfjk"
         )
       )
-      Jsoup.parse(contentAsString(emptySubject)).getElementsByClass("error-notification").asScala must have size 1
+
+      Jsoup.parse(contentAsString(emptySubject)).getElementsByClass("govuk-input govuk-input--error").asScala must have size 1
       status(emptySubject) must be(BAD_REQUEST)
 
       val emptyMessage = controller.submit(customer_utr)(
@@ -217,17 +251,19 @@ class SecureMessageControllerSpec
           "subject" -> "subject"
         )
       )
-      Jsoup.parse(contentAsString(emptyMessage)).getElementsByClass("error-notification").asScala must have size 1
+
+      Jsoup.parse(contentAsString(emptyMessage)).getElementsByClass("govuk-textarea govuk-textarea--error").asScala must have size 1
       status(emptyMessage) must be(BAD_REQUEST)
 
       val emptyFormFields = controller.submit(customer_utr)(FakeRequest())
-      Jsoup.parse(contentAsString(emptyFormFields)).getElementsByClass("error-notification").asScala must have size 2
+
+      Jsoup.parse(contentAsString(emptyFormFields)).getElementsByClass("govuk-form-group").asScala must have size 2
       status(emptyFormFields) must be(BAD_REQUEST)
     }
 
     "Leave script tags in the message and subject" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
-      givenMessageRespondsWith(SecureMessageCreator.uncleanMessage, successfulResponse)
+      givenMessageRespondsWith(externalRefID, SecureMessageCreator.uncleanMessage, successfulResponse)
 
       val xssMessage = controller.submit(utr.value)(
         FakeRequest().withFormUrlEncodedBody(
@@ -241,21 +277,22 @@ class SecureMessageControllerSpec
 
     "redirect to the success page when the form submission is successful" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
-      givenMessageRespondsWith(SecureMessageCreator.message, successfulResponse)
+
+      givenMessageRespondsWith(externalRefID, SecureMessageCreator.message, successfulResponse)
 
       submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/success"
     }
 
     "redirect and indicate a duplicate message submission" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
-      givenMessageRespondsWith(SecureMessageCreator.message, duplicatedMessage)
+      givenMessageRespondsWith(externalRefID, SecureMessageCreator.message, duplicatedMessage)
 
       submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/duplicate"
     }
 
     "redirect and indicate an unexpected error has occurred when processing the submission" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
-      givenMessageRespondsWith(SecureMessageCreator.message, unknownTaxId)
+      givenMessageRespondsWith(externalRefID, SecureMessageCreator.message, unknownTaxId)
 
       submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/unexpected"
     }
@@ -276,7 +313,7 @@ class SecureMessageControllerSpec
 
   "submission result page" should {
     "contain correct message for success" in {
-      controller.success(utr.value)(getRequest) shouldContainPageWithTitleAndMessage (
+      controller.success(utr.value)(getRequest) shouldContainPageWithTitleAndSuccessMessage (
         "Advice creation successful", utr.value,
         "Thanks. Your reply has been successfully received by the customer's Tax Account secure message Inbox."
       )
@@ -321,7 +358,7 @@ class SecureMessageControllerSpec
       charset(result) must be(Some("utf-8"))
 
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").attr("id") must be("global-header")
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
 
       withClue("result page title") {
         document.title() must be(title)
@@ -332,11 +369,35 @@ class SecureMessageControllerSpec
       }
 
       withClue("result message") {
-        val creationResult = document.select("p.alert__message")
+        val creationResult = document.select("p.govuk-error-message")
         creationResult must have size 1
         creationResult.get(0).text() must be(message)
       }
     }
+
+    def shouldContainPageWithTitleAndSuccessMessage(title: String, utr: String, message: String) = {
+      status(result) must be(200)
+      contentType(result) must be(Some("text/html"))
+      charset(result) must be(Some("utf-8"))
+
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
+
+      withClue("result page title") {
+        document.title() must be(title)
+      }
+
+      withClue("result page header") {
+        document.select("h2").text().trim must include(s"Reply to customer with SA-UTR $utr")
+      }
+
+      withClue("result message") {
+        val creationResult = document.select("h3.govuk-notification-banner__heading")
+        creationResult must have size 1
+        creationResult.get(0).text() must be(message)
+      }
+    }
+
   }
 
   implicit class ReturnsRedirectTo(result: Future[Result]) {

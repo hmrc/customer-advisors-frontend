@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.contactadvisors.domain
+@this(layout: Layout)
 
-sealed trait StorageResult extends Product with Serializable
-case class AdviceStored(messageId: String) extends StorageResult
-case object AdviceAlreadyExists extends StorageResult
-case object UnknownTaxId extends StorageResult
-case object UserIsNotPaperless extends StorageResult
-final case class UnexpectedError(msg: String) extends StorageResult
+@(string: String)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = None) {
+@string
+}

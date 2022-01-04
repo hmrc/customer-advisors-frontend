@@ -1,3 +1,7 @@
+
+### NoDocs ###
+->          /hmrc-frontend                                                     hmrcfrontend.Routes
+
 # microservice specific routes
 
 GET        /inbox/:utr                                      uk.gov.hmrc.contactadvisors.controllers.SecureMessageController.inbox(utr: String)

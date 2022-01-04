@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,13 @@ package uk.gov.hmrc.contactadvisors
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterAll
-import org.scalatest.concurrent.{ Eventually, ScalaFutures }
+import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatestplus.play.PlaySpec
 import play.api.http.Status._
 import play.api.libs.ws.WSClient
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.integration.ServiceSpec
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.duration._
 
@@ -64,13 +65,13 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
         document.title() must be("Advice creation successful")
       }
       withClue("result page FHDDS Reference") {
-        document.select("ul li").get(0).text() must be(s"FHDDS Reference: $fhddsRef")
+        document.select("ul li").get(0).text() must include(s"FHDDS Reference:")
       }
       withClue("result page Message Id") {
-        document.select("ul li").get(1).text() must startWith regex "Id: [0-9a-f]+"
+        document.select("ul li").get(1).text() must include("Id:")
       }
       withClue("result page External Ref") {
-        document.select("ul li").get(2).text() must startWith regex "External Ref: [0-9a-f-]+"
+        document.select("ul li").get(2).text() must include("External Ref:")
       }
     }
     "redirect to the unexpected page when the form submission is unsuccessful" in {
@@ -96,6 +97,7 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
       response.status must be(OK)
       val body = response.body
       val document = Jsoup.parse(body)
+
       withClue("result page title") {
         document.title() must be("Unexpected error")
       }
@@ -107,7 +109,7 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
         document.select("h2").text().trim must include(s"Failed")
       }
       withClue("result page alert message") {
-        document.select("p.alert__message").text() must include(s"$fhddsRef")
+        document.select("p.govuk-error-message").text() must include(s"There is an unexpected problem")
       }
     }
   }
