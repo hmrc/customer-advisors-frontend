@@ -392,7 +392,7 @@ class SecureMessageControllerSpec
       }
 
       withClue("result message") {
-        val creationResult = document.select("h3.govuk-notification-banner__heading")
+        val creationResult = document.select("h2.govuk-notification-banner__title")
         creationResult must have size 1
         creationResult.get(0).text() must be(message)
       }
