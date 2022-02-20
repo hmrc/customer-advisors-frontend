@@ -54,3 +54,5 @@ lazy val microservice = Project(appName, file("."))
     DefaultBuildSettings.integrationTestSettings()
   )
   .settings(resolvers ++= Seq(Resolver.jcenterRepo))
+  .settings(ScoverageSettings())
+  
