@@ -16,7 +16,7 @@ object AppDependencies {
     "com.typesafe.play"      %% "play-json-joda"             % "2.9.2",
     "org.jsoup"              %  "jsoup"                      % "1.14.3",
     "com.vladsch.flexmark"   %  "flexmark-all"               % "0.35.10"       % "test,it",
-    "org.pegdown"            % " pegdown"                    % "1.6.0"         % "test,it",
+    "org.pegdown"            %  "pegdown"                    % "1.6.0"         % "test,it",
     "uk.gov.hmrc"            %% "bootstrap-test-play-28"     % "5.18.0"        % Test,
     "org.scalatest"          %% "scalatest"                  % "3.0.0"         % Test,
     "com.typesafe.play"      %% "play-test"                  % current         % Test,
