@@ -11,7 +11,7 @@ object AppDependencies {
     "uk.gov.hmrc"            %% "auth-client"              % "5.7.0-play-28",
     "uk.gov.hmrc"            %% "govuk-template"           % "5.72.0-play-28",
     "uk.gov.hmrc"            %% "domain"                   % "6.2.0-play-28",
-    "uk.gov.hmrc"            %% "play-frontend-hmrc"       % "1.31.0-play-28",
+    "uk.gov.hmrc"            %% "play-frontend-hmrc"       % "6.2.0-play-28",
     "uk.gov.hmrc"            %% "play-partials"            % "8.2.0-play-28",
     "com.typesafe.play"      %% "play-json-joda"           % "2.9.2",
     "org.jsoup"              % "jsoup"                     % "1.14.3",
