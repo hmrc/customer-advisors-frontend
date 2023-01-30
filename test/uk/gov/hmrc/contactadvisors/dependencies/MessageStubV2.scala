@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,7 @@ package uk.gov.hmrc.contactadvisors.dependencies
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.apache.commons.codec.binary.Base64
 import org.joda.time.DateTime
-import org.skyscreamer.jsonassert.JSONCompareMode
 import play.api.http.Status
-import uk.gov.hmrc.contactadvisors.connectors.models.ExternalReferenceV2
 import uk.gov.hmrc.contactadvisors.domain.AdviceV2
 
 trait MessageStubV2 {
@@ -87,7 +85,8 @@ trait MessageStubV2 {
                | "alertQueue":"PRIORITY"
                |}
          """.stripMargin,
-            JSONCompareMode.LENIENT
+            true,
+            true
           )
         )
         .willReturn(aResponse().withStatus(response._1).withBody(response._2)))
