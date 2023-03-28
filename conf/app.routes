@@ -1,6 +1,6 @@
 
 ### NoDocs ###
-->          /hmrc-frontend                                                     hmrcfrontend.Routes
+->         /hmrc-frontend                                   hmrcfrontend.Routes
 
 # microservice specific routes
 

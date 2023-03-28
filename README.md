@@ -13,6 +13,11 @@ Format:
 
 Then run the tests and coverage report:
 
+```bash
+# Start the services
+sm --start AUTH USER_DETAILS PREFERENCES MESSAGE HMRCDESKPRO SA DATASTREAM
+```
+
 `sbt clean coverage test coverageReport`
 
 If your build fails due to poor test coverage, *DO NOT* lower the test coverage threshold, instead inspect the generated report located here on your local repo: `/target/scala-2.12/scoverage-report/index.html`
@@ -20,6 +25,11 @@ If your build fails due to poor test coverage, *DO NOT* lower the test coverage 
 Then run the integration tests:
 
 `sbt it:test`
+
+```bash
+# Stop the services
+sm --stop AUTH USER_DETAILS PREFERENCES MESSAGE HMRCDESKPRO SA DATASTREAM
+```
 
 
 #### License
