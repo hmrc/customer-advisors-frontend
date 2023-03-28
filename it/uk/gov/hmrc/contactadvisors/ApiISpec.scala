@@ -65,13 +65,13 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
         document.title() must be("Advice creation successful")
       }
       withClue("result page FHDDS Reference") {
-        document.select("ul li").get(0).text() must include(s"FHDDS Reference:")
+        document.select(".govuk-list li").get(0).text() must include(s"FHDDS Reference:")
       }
       withClue("result page Message Id") {
-        document.select("ul li").get(1).text() must include("Id:")
+        document.select(".govuk-list li").get(1).text() must include("Id:")
       }
       withClue("result page External Ref") {
-        document.select("ul li").get(2).text() must include("External Ref:")
+        document.select(".govuk-list li").get(2).text() must include("External Ref:")
       }
     }
     "redirect to the unexpected page when the form submission is unsuccessful" in {
