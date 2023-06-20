@@ -228,8 +228,8 @@ class CustomerAdviceAudit @Inject()(auditConnector: AuditConnector) {
             createEvent(Map("reason" -> s"Unexpected Error: ${ex.getMessage}"), EventTypes.Failed, "Message Not Stored")
         }
         .foreach { ev =>
-          auditConnector.sendEvent(ev).onFailure {
-            case err => logger.error("Could not audit event", err)
+          auditConnector.sendEvent(ev).recover {
+            case err => logger.error(s"Could not audit event ${err.getMessage}")
           }
         }
     }
@@ -289,8 +289,8 @@ class CustomerAdviceAudit @Inject()(auditConnector: AuditConnector) {
             createEvent(Map("reason" -> s"Unexpected Error: ${ex.getMessage}"), EventTypes.Failed, "Message Not Stored")
         }
         .foreach { ev =>
-          auditConnector.sendEvent(ev).onFailure {
-            case err => logger.error("Could not audit event")
+          auditConnector.sendEvent(ev).recover {
+            case err => logger.error(s"Could not audit event ${err.getMessage}")
           }
         }
     }

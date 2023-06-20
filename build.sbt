@@ -1,22 +1,7 @@
-
-import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings, targetJvm}
-import uk.gov.hmrc.{DefaultBuildSettings, ExternalService}
-import uk.gov.hmrc.ServiceManagerPlugin.Keys.itDependenciesList
+import uk.gov.hmrc.DefaultBuildSettings.{ defaultSettings, scalaSettings }
+import uk.gov.hmrc.DefaultBuildSettings
 
 val appName = "customer-advisors-frontend"
-
-val silencerVersion = "1.7.0"
-
-lazy val externalServices = List(
-  ExternalService("AUTH"),
-  ExternalService("USER_DETAILS"),
-  ExternalService("PREFERENCES"),
-  ExternalService("MESSAGE"),
-  ExternalService("ENTITY_RESOLVER"),
-  ExternalService("HMRCDESKPRO"),
-  ExternalService("SA"),
-  ExternalService("DATASTREAM", enableTestOnlyEndpoints = true)
-)
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -25,8 +10,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(scalaSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(
-    targetJvm := "jvm-1.8",
-    scalaVersion := "2.12.12",
+    scalaVersion := "2.13.8",
     libraryDependencies ++= AppDependencies.dependencies,
     Test / parallelExecution := false,
     Test / fork := false,
@@ -42,11 +26,8 @@ lazy val microservice = Project(appName, file("."))
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
-  .settings(ServiceManagerPlugin.serviceManagerSettings)
-  .settings(itDependenciesList := externalServices)
   .settings(
     DefaultBuildSettings.integrationTestSettings()
   )
   .settings(resolvers ++= Seq(Resolver.jcenterRepo))
   .settings(ScoverageSettings())
-  
