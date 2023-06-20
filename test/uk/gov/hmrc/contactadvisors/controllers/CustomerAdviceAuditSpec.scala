@@ -131,7 +131,7 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
   }
 
   trait TestCase {
-
+    implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
     val secureMessageServiceMock = mock[SecureMessageService]
     val customerAdviceAuditMock = new CustomerAdviceAudit(auditConnectorMock)
     val env = Environment.simple()
@@ -156,7 +156,6 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
       controllerComponents,
       customerAdviceAudit,
       secureMessageServiceMock,
-      messageApi,
       inboxPage,
       inboxPageV2,
       successPage,
@@ -167,7 +166,7 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
       unknownPage,
       unexpectedPage,
       unexpectedV2Page
-    )(appConfig) {
+    )(appConfig, ec) {
       val secureMessageService: SecureMessageService = secureMessageServiceMock
 
       def auditSource: String = "customer-advisors-frontend"

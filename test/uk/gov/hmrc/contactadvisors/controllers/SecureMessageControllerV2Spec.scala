@@ -35,7 +35,7 @@ import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, Duplica
 import uk.gov.hmrc.utils.{ SecureMessageCreatorV2, WithWiremock }
 
 import scala.collection.JavaConverters._
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
 class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock with MessageStubV2 {
 
@@ -45,6 +45,8 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       "microservice.services.entity-resolver.port" -> "10100"
     )
     .build()
+
+  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val getRequest = FakeRequest("GET", "/")
   val postRequest = FakeRequest("POST", "/")
@@ -79,7 +81,6 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
     controllerComponents,
     customerAdviceAudit,
     secureMessageService,
-    messageApi,
     inboxPage,
     inboxPageV2,
     successPage,
@@ -90,7 +91,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
     unknownPage,
     unexpectedPage,
     unexpectedV2Page
-  )(appConfig) {
+  )(appConfig, ec) {
     def auditSource: String = "customer-advisors-frontend"
   }
 

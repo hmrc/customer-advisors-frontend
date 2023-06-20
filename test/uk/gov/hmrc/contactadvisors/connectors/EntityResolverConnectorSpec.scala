@@ -33,13 +33,15 @@ import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.utils.WithWiremock
 
+import scala.concurrent.ExecutionContext
+
 @Singleton
 class TestEntityResolverConnector @Inject()(
   http: HttpClient,
   val runModeConfiguration: Configuration,
   servicesConfig: ServicesConfig,
-  val environment: Environment)
-    extends EntityResolverConnector(http, servicesConfig) {
+  val environment: Environment)(implicit ec: ExecutionContext)
+    extends EntityResolverConnector(http, servicesConfig)(ec) {
   override lazy val serviceUrl: String = s"http://localhost:8015"
 }
 

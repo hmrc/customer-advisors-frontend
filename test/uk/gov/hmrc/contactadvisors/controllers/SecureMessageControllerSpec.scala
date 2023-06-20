@@ -42,7 +42,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
 
 import scala.collection.JavaConverters._
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
 class SecureMessageControllerSpec
     extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock with EntityResolverStub with MessageStub {
@@ -53,6 +53,7 @@ class SecureMessageControllerSpec
       "microservice.services.entity-resolver.port" -> "10100"
     )
     .build()
+  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val getRequest = FakeRequest("GET", "/")
   val postRequest = FakeRequest("POST", "/")
@@ -82,7 +83,6 @@ class SecureMessageControllerSpec
     controllerComponents,
     customerAdviceAudit,
     secureMessageService,
-    messageApi,
     inboxPage,
     inboxPageV2,
     successPage,
@@ -93,7 +93,7 @@ class SecureMessageControllerSpec
     unknownPage,
     unexpectedPage,
     unexpectedV2Page
-  )(app.injector.instanceOf[FrontendAppConfig]) {
+  )(app.injector.instanceOf[FrontendAppConfig], ec) {
     def auditSource: String = "customer-advisors-frontend"
   }
   val externalRefID = secureMessageService.generateExternalRefID

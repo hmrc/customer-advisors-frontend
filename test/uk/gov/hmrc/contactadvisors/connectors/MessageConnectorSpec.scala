@@ -29,17 +29,19 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.play.PlaySpec
 import play.api.http.Status
 import play.api.libs.json.Json
-import play.api.{ Configuration, Environment }
 import uk.gov.hmrc.contactadvisors.domain.{ AdviceAlreadyExists, AdviceStored, UnexpectedError }
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
 
+import scala.concurrent.ExecutionContext
+
 @Singleton
 class TestMessageConnector @Inject()(
   http: HttpClient,
   servicesConfig: ServicesConfig
-) extends MessageConnector(http, servicesConfig) {
+)(implicit ec: ExecutionContext)
+    extends MessageConnector(http, servicesConfig)(ec) {
 
   override lazy val serviceUrl: String = s"http://localhost:58008"
 }

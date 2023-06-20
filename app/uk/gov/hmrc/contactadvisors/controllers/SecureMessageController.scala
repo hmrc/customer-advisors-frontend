@@ -18,12 +18,11 @@ package uk.gov.hmrc.contactadvisors.controllers
 
 import play.api.Logging
 
-import java.util.UUID
 import javax.inject.{ Inject, Singleton }
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.Lang.logger
-import play.api.i18n.{ I18nSupport, MessagesApi }
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 import uk.gov.hmrc.contactadvisors.connectors.models.ExternalReferenceV2
 import uk.gov.hmrc.contactadvisors.domain._
@@ -35,15 +34,14 @@ import uk.gov.hmrc.play.audit.EventKeys
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{ DataEvent, EventTypes }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import uk.gov.hmrc.contactadvisors.views.html.{ Home, secureMessage }
+
+import scala.concurrent.{ ExecutionContext, Future }
+
 @Singleton
 class SecureMessageController @Inject()(
   controllerComponents: MessagesControllerComponents,
   customerAdviceAudit: CustomerAdviceAudit,
   secureMessageService: SecureMessageService,
-  messagesApi: MessagesApi,
   inboxPage: Inbox,
   inboxPageV2: InboxV2,
   successPage: Success,
@@ -54,7 +52,7 @@ class SecureMessageController @Inject()(
   unknownPage: Unknown,
   unexpectedPage: Unexpected,
   unexpectedV2Page: UnexpectedV2
-)(implicit val appConfig: uk.gov.hmrc.contactadvisors.FrontendAppConfig)
+)(implicit val appConfig: uk.gov.hmrc.contactadvisors.FrontendAppConfig, ec: ExecutionContext)
     extends FrontendController(controllerComponents) with I18nSupport with Logging {
 
   def inbox(utr: String) = Action.async { implicit request =>
@@ -199,7 +197,7 @@ class SecureMessageController @Inject()(
 }
 
 @Singleton
-class CustomerAdviceAudit @Inject()(auditConnector: AuditConnector) {
+class CustomerAdviceAudit @Inject()(auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
 
   def auditSource: String = "customer-advisors-frontend"
 
