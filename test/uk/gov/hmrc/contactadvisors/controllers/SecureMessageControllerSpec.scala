@@ -266,7 +266,7 @@ class SecureMessageControllerSpec
       givenMessageRespondsWith(externalRefID, SecureMessageCreator.uncleanMessage, successfulResponse)
 
       val xssMessage = controller.submit(utr.value)(
-        FakeRequest().withFormUrlEncodedBody(
+        FakeRequest(routes.SecureMessageController.submit(utr.value)).withFormUrlEncodedBody(
           "subject" -> "This is a response to your HMRC request<script>alert('hax')</script>",
           "message" -> "<p>This is the content of the secure message</p><script>alert('more hax')</script>"
         )
@@ -345,7 +345,7 @@ class SecureMessageControllerSpec
   }
 
   def submissionOfCompletedForm() = controller.submit(utr.value)(
-    FakeRequest().withFormUrlEncodedBody(
+    FakeRequest(routes.SecureMessageController.submit(utr.value)).withFormUrlEncodedBody(
       "subject" -> subject,
       "message" -> adviceBody
     )

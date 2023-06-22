@@ -185,7 +185,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
   "POST /customer-advisors-frontend/submit" should {
     "indicate a bad request when any of the form elements are empty" in {
       val emptySubject = controller.submitV2()(
-        FakeRequest().withFormUrlEncodedBody(
+        FakeRequest(routes.SecureMessageController.submitV2()).withFormUrlEncodedBody(
           "content"                     -> content,
           "recipientTaxidentifierName"  -> recipientTaxidentifierName,
           "recipientTaxidentifierValue" -> recipientTaxidentifierValue,
@@ -199,7 +199,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       status(emptySubject) must be(BAD_REQUEST)
 
       val emptyMessage = controller.submitV2()(
-        FakeRequest().withFormUrlEncodedBody(
+        FakeRequest(routes.SecureMessageController.submitV2()).withFormUrlEncodedBody(
           "subject"                     -> subject,
           "recipientTaxidentifierName"  -> recipientTaxidentifierName,
           "recipientTaxidentifierValue" -> recipientTaxidentifierValue,
@@ -224,7 +224,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       givenMessageRespondsWith(externalRefID, advice, successfulResponse)
 
       val xssMessage = controller.submitV2()(
-        FakeRequest().withFormUrlEncodedBody(
+        FakeRequest(routes.SecureMessageController.submitV2()).withFormUrlEncodedBody(
           "content"                     -> advice.content,
           "subject"                     -> advice.subject,
           "recipientTaxidentifierName"  -> advice.recipientTaxidentifierName,
@@ -243,7 +243,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       givenMessageRespondsWith(externalRefID, advice, successfulResponse)
 
       val xssMessage = controller.submitV2()(
-        FakeRequest().withFormUrlEncodedBody(
+        FakeRequest(routes.SecureMessageController.submitV2()).withFormUrlEncodedBody(
           "content"                     -> advice.content,
           "subject"                     -> advice.subject,
           "recipientTaxidentifierName"  -> advice.recipientTaxidentifierName,
@@ -262,7 +262,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       givenMessageRespondsWith(externalRefID, advice, duplicatedMessage)
 
       val xssMessage = controller.submitV2()(
-        FakeRequest().withFormUrlEncodedBody(
+        FakeRequest(routes.SecureMessageController.submitV2()).withFormUrlEncodedBody(
           "content"                     -> advice.content,
           "subject"                     -> advice.subject,
           "recipientTaxidentifierName"  -> advice.recipientTaxidentifierName,
@@ -281,7 +281,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       givenMessageRespondsWith(externalRefID, advice, (1, "asdfasdf"))
 
       val xssMessage = controller.submitV2()(
-        FakeRequest().withFormUrlEncodedBody(
+        FakeRequest(routes.SecureMessageController.submitV2()).withFormUrlEncodedBody(
           "content"                     -> advice.content,
           "subject"                     -> advice.subject,
           "recipientTaxidentifierName"  -> advice.recipientTaxidentifierName,

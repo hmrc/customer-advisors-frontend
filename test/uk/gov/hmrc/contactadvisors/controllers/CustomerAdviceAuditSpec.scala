@@ -16,14 +16,12 @@
 
 package uk.gov.hmrc.contactadvisors.controllers
 
-import org.mockito.ArgumentCaptor
 import org.scalatest.concurrent.{ Eventually, IntegrationPatience, ScalaFutures }
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.MessagesApi
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{ MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
-import play.api.{ Configuration, Environment }
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
@@ -32,15 +30,45 @@ import uk.gov.hmrc.play.audit.EventKeys
 import uk.gov.hmrc.play.audit.http.connector.{ AuditConnector, AuditResult }
 import uk.gov.hmrc.play.audit.model.DataEvent
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{ verify, when }
+import org.mockito.Mockito.{ reset, verify, when }
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar.mock
+import play.api.Application
+import play.api.http.Status.SEE_OTHER
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.Results.{ Ok, SeeOther }
+import play.api.test.Helpers.status
 import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
-class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAppPerSuite with IntegrationPatience with Eventually {
+class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
+
+  implicit lazy override val app: Application = new GuiceApplicationBuilder()
+    .configure(
+      "auditing.enabled" -> true
+    )
+    .build()
+
+  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+  val appConfig = app.injector.instanceOf[FrontendAppConfig]
+  val controllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  val inboxPage = app.injector.instanceOf[Inbox]
+  val inboxPageV2 = app.injector.instanceOf[InboxV2]
+  val successPage = app.injector.instanceOf[Success]
+  val successPageV2 = app.injector.instanceOf[SuccessV2]
+  val duplicatePage = app.injector.instanceOf[Duplicate]
+  val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
+  val notPaperlessPage = app.injector.instanceOf[Not_paperless]
+  val unknownPage = app.injector.instanceOf[Unknown]
+  val unexpectedPage = app.injector.instanceOf[Unexpected]
+  val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
+
+  val request = FakeRequest("POST", "/inbox/123456789").withFormUrlEncodedBody(
+    "subject" -> "New message subject",
+    "message" -> "New message body"
+  )
 
   "SecureMessageController" should {
 
@@ -48,11 +76,11 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
       when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
         .thenReturn(Future.successful(AdviceStored("1234")))
 
-      controller.submit("123456789")(request).futureValue
+      val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
+      val result = controller.submit("123456789")(request).futureValue
+      status(Future.successful(result)) must be(SEE_OTHER)
 
-      eventually {
-        verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
-      }
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
 
       val event = dataEventCaptor.getValue
       event.auditSource must be("customer-advisors-frontend")
@@ -64,12 +92,10 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
     "audit the duplicate message event" in new TestCase {
       when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
         .thenReturn(Future.successful(AdviceAlreadyExists))
-
-      controller.submit("123456789")(request).futureValue
-
-      eventually {
-        verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
-      }
+      val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
+      val result = controller.submit("123456789")(request).futureValue
+      result must be(SeeOther("/secure-message/inbox/123456789/duplicate"))
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
 
       val event = dataEventCaptor.getValue
       event.auditSource must be("customer-advisors-frontend")
@@ -81,12 +107,11 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
     "audit the unknown tax id event" in new TestCase {
       when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
         .thenReturn(Future.successful(UnknownTaxId))
+      val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
+      val result: Result = controller.submit("123456789")(request).futureValue
+      result must be(SeeOther("/secure-message/inbox/123456789/unknown"))
 
-      controller.submit("123456789")(request).futureValue
-
-      eventually {
-        verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
-      }
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
 
       val event = dataEventCaptor.getValue
       event.auditSource must be("customer-advisors-frontend")
@@ -99,11 +124,11 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
       when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
         .thenReturn(Future.successful(UserIsNotPaperless))
 
-      controller.submit("123456789")(request).futureValue
+      val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
+      val result = controller.submit("123456789")(request).futureValue
+      result must be(SeeOther("/secure-message/inbox/123456789/not-paperless"))
 
-      eventually {
-        verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
-      }
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
 
       val event = dataEventCaptor.getValue
       event.auditSource must be("customer-advisors-frontend")
@@ -115,12 +140,10 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
     "audit the unexpected error event" in new TestCase {
       when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
         .thenReturn(Future.successful(UnexpectedError("this is the reason")))
-
+      val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       controller.submit("123456789")(request).futureValue
 
-      eventually {
-        verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
-      }
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
 
       val event = dataEventCaptor.getValue
       event.auditSource must be("customer-advisors-frontend")
@@ -131,27 +154,9 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
   }
 
   trait TestCase {
-    implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
     val secureMessageServiceMock = mock[SecureMessageService]
-    val customerAdviceAuditMock = new CustomerAdviceAudit(auditConnectorMock)
-    val env = Environment.simple()
-    val configuration = Configuration.reference ++ Configuration.from(Map("Test.google-analytics.token" -> "token", "Test.google-analytics.host" -> "host"))
     val auditConnectorMock = mock[AuditConnector]
     val customerAdviceAudit = new CustomerAdviceAudit(auditConnectorMock)
-    val appConfig = app.injector.instanceOf[FrontendAppConfig]
-    val controllerComponents = app.injector.instanceOf[MessagesControllerComponents]
-    val messageApi = app.injector.instanceOf[MessagesApi]
-    val inboxPage = app.injector.instanceOf[Inbox]
-    val inboxPageV2 = app.injector.instanceOf[InboxV2]
-    val successPage = app.injector.instanceOf[Success]
-    val successPageV2 = app.injector.instanceOf[SuccessV2]
-    val duplicatePage = app.injector.instanceOf[Duplicate]
-    val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
-    val notPaperlessPage = app.injector.instanceOf[Not_paperless]
-    val unknownPage = app.injector.instanceOf[Unknown]
-    val unexpectedPage = app.injector.instanceOf[Unexpected]
-    val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
-
     val controller = new SecureMessageController(
       controllerComponents,
       customerAdviceAudit,
@@ -166,18 +171,8 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
       unknownPage,
       unexpectedPage,
       unexpectedV2Page
-    )(appConfig, ec) {
-      val secureMessageService: SecureMessageService = secureMessageServiceMock
+    )(appConfig, ec)
 
-      def auditSource: String = "customer-advisors-frontend"
-    }
-    val dataEventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
-    implicit val hc = HeaderCarrier
-    when(auditConnectorMock.sendEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
-
-    val request = FakeRequest("POST", "/inbox/123456789").withFormUrlEncodedBody(
-      "subject" -> "New message subject",
-      "message" -> "New message body"
-    )
+    when(auditConnectorMock.sendEvent(any[DataEvent])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(AuditResult.Success))
   }
 }
