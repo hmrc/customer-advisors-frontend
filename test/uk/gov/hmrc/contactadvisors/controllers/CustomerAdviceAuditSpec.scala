@@ -16,30 +16,29 @@
 
 package uk.gov.hmrc.contactadvisors.controllers
 
-import org.scalatest.concurrent.{ Eventually, IntegrationPatience, ScalaFutures }
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{ verify, when }
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n.MessagesApi
+import play.api.Application
+import play.api.http.Status.SEE_OTHER
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.Results.SeeOther
 import play.api.mvc.{ MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
+import play.api.test.Helpers.{ defaultAwaitTimeout, status }
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.EventKeys
 import uk.gov.hmrc.play.audit.http.connector.{ AuditConnector, AuditResult }
 import uk.gov.hmrc.play.audit.model.DataEvent
-import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{ reset, verify, when }
-import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.mockito.MockitoSugar.mock
-import play.api.Application
-import play.api.http.Status.SEE_OTHER
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.Results.{ Ok, SeeOther }
-import play.api.test.Helpers.status
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
 
 import scala.concurrent.{ ExecutionContext, Future }
 

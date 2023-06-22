@@ -17,32 +17,26 @@
 package uk.gov.hmrc.contactadvisors.controllers
 
 import org.mockito.ArgumentCaptor
-import org.scalatest.matchers.must.Matchers
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{ verify, when }
 import org.scalatest.concurrent.{ Eventually, IntegrationPatience, ScalaFutures }
+import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
+import play.api.http.Status.SEE_OTHER
 import play.api.i18n.MessagesApi
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{ MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
-import play.api.{ Application, Configuration, Environment }
+import play.api.test.Helpers.{ defaultAwaitTimeout, status }
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage._
 import uk.gov.hmrc.play.audit.EventKeys
 import uk.gov.hmrc.play.audit.http.connector.{ AuditConnector, AuditResult }
 import uk.gov.hmrc.play.audit.model.DataEvent
-import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{ verify, when }
-import org.scalatestplus.mockito.MockitoSugar.mock
-import play.api.http.Status.SEE_OTHER
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.Results.SeeOther
-import play.api.test.Helpers.status
-import play.api.test.Helpers.defaultAwaitTimeout
 
 import scala.concurrent.Future
 
