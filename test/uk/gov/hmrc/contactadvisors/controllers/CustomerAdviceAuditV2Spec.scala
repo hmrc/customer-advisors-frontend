@@ -18,15 +18,13 @@ package uk.gov.hmrc.contactadvisors.controllers
 
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{ reset, verify, when }
+import org.mockito.Mockito.{ verify, when }
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
 import play.api.http.Status.SEE_OTHER
 import play.api.i18n.MessagesApi
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{ MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ defaultAwaitTimeout, status }
