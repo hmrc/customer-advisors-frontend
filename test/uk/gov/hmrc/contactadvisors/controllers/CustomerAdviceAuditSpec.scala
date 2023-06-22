@@ -18,7 +18,7 @@ package uk.gov.hmrc.contactadvisors.controllers
 
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{ verify, when }
+import org.mockito.Mockito.{ reset, verify, when }
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -74,6 +74,7 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
     "audit the successful event" in new TestCase {
       when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
         .thenReturn(Future.successful(AdviceStored("1234")))
+      when(auditConnectorMock.sendEvent(any[DataEvent])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(AuditResult.Success))
 
       val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       val result = controller.submit("123456789")(request).futureValue
@@ -139,6 +140,8 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
     "audit the unexpected error event" in new TestCase {
       when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
         .thenReturn(Future.successful(UnexpectedError("this is the reason")))
+      when(auditConnectorMock.sendEvent(any[DataEvent])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(AuditResult.Success))
+
       val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       controller.submit("123456789")(request).futureValue
 
@@ -172,6 +175,6 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
       unexpectedV2Page
     )(appConfig, ec)
 
-    when(auditConnectorMock.sendEvent(any[DataEvent])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(AuditResult.Success))
+    reset(auditConnectorMock, secureMessageServiceMock)
   }
 }

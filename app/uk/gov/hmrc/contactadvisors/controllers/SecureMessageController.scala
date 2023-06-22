@@ -76,12 +76,10 @@ class SecureMessageController @Inject()(
 
   def submit(utr: String) = Action.async { implicit request =>
     adviceForm.bindFromRequest.fold(
-      formWithErrors => {
-        println(formWithErrors.errors)
+      formWithErrors =>
         Future.successful(
           BadRequest(inboxPage(utr, formWithErrors))
-        )
-      },
+      ),
       advice => {
         val result = secureMessageService.createMessage(advice, SaUtr(utr))
         customerAdviceAudit.auditAdvice(result, SaUtr(utr))
