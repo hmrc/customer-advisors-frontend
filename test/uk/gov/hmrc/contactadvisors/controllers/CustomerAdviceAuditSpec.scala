@@ -63,6 +63,9 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
   val unknownPage = app.injector.instanceOf[Unknown]
   val unexpectedPage = app.injector.instanceOf[Unexpected]
   val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
+  val secureMessageServiceMock = mock[SecureMessageService]
+  val auditConnectorMock = mock[AuditConnector]
+  val customerAdviceAudit = new CustomerAdviceAudit(auditConnectorMock)
 
   val request = FakeRequest("POST", "/inbox/123456789").withFormUrlEncodedBody(
     "subject" -> "New message subject",
@@ -156,9 +159,8 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
   }
 
   trait TestCase {
-    val secureMessageServiceMock = mock[SecureMessageService]
-    val auditConnectorMock = mock[AuditConnector]
-    val customerAdviceAudit = new CustomerAdviceAudit(auditConnectorMock)
+    reset(auditConnectorMock, secureMessageServiceMock)
+
     val controller = new SecureMessageController(
       controllerComponents,
       customerAdviceAudit,
@@ -174,7 +176,5 @@ class CustomerAdviceAuditSpec extends PlaySpec with ScalaFutures with GuiceOneAp
       unexpectedPage,
       unexpectedV2Page
     )(appConfig, ec)
-
-    reset(auditConnectorMock, secureMessageServiceMock)
   }
 }

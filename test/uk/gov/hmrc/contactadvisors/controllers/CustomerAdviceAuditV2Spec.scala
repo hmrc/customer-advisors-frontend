@@ -18,7 +18,7 @@ package uk.gov.hmrc.contactadvisors.controllers
 
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{ verify, when }
+import org.mockito.Mockito.{ reset, verify, when }
 import org.scalatest.concurrent.{ Eventually, IntegrationPatience, ScalaFutures }
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.PlaySpec
@@ -48,6 +48,10 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     )
     .build()
 
+  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+  val auditConnectorMock: AuditConnector = mock[AuditConnector]
+  val secureMessageServiceMock = mock[SecureMessageService]
+  val customerAdviceAudit = new CustomerAdviceAudit(auditConnectorMock)
   val appConfig = app.injector.instanceOf[FrontendAppConfig]
   val controllerComponents = app.injector.instanceOf[MessagesControllerComponents]
   val messageApi = app.injector.instanceOf[MessagesApi]
@@ -62,6 +66,17 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
   val unexpectedPage = app.injector.instanceOf[Unexpected]
   val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
 
+  val request = FakeRequest("POST", "/customer-advisors-frontend/submit").withFormUrlEncodedBody(
+    "content"                     -> "content",
+    "subject"                     -> "subject",
+    "recipientTaxidentifierName"  -> "HMRC-OBTDS-ORG",
+    "recipientTaxidentifierValue" -> "XZFH00000100024",
+    "recipientEmail"              -> "foo@bar.com",
+    "recipientNameLine1"          -> "Mr. John Smith",
+    "messageType"                 -> "fhddsAlertMessage",
+    "alertQueue"                  -> "PRIORITY"
+  )
+
   "SecureMessageController" should {
 
     "audit the successful event" in new TestCaseV2 {
@@ -69,6 +84,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
         .thenReturn(Future.successful(AdviceStored("1234")))
 
       when(secureMessageServiceMock.generateExternalRefID).thenReturn("75d80f37-2cb4-4571-a100-5f8511986fb7")
+      when(auditConnectorMock.sendEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
 
       val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       val result: Result = controller.submitV2()(request).futureValue
@@ -248,10 +264,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
   }
 
   trait TestCaseV2 {
-    implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
-    val auditConnectorMock: AuditConnector = mock[AuditConnector]
-    val secureMessageServiceMock = mock[SecureMessageService]
-    lazy val customerAdviceAudit = new CustomerAdviceAudit(auditConnectorMock)
+    reset(auditConnectorMock, secureMessageServiceMock)
 
     val controller = new SecureMessageController(
       controllerComponents,
@@ -268,18 +281,5 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
       unexpectedPage,
       unexpectedV2Page
     )(appConfig, ec)
-
-    when(auditConnectorMock.sendEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
-
-    val request = FakeRequest("POST", "/customer-advisors-frontend/submit").withFormUrlEncodedBody(
-      "content"                     -> "content",
-      "subject"                     -> "subject",
-      "recipientTaxidentifierName"  -> "HMRC-OBTDS-ORG",
-      "recipientTaxidentifierValue" -> "XZFH00000100024",
-      "recipientEmail"              -> "foo@bar.com",
-      "recipientNameLine1"          -> "Mr. John Smith",
-      "messageType"                 -> "fhddsAlertMessage",
-      "alertQueue"                  -> "PRIORITY"
-    )
   }
 }
