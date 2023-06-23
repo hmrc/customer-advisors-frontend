@@ -58,7 +58,7 @@ class SecureMessageService @Inject()(messageConnector: MessageConnector, entityR
     SecureMessage(recipient, externalReference, messageType, subject, content, validFrom, details)
   }
 
-  def createMessageV2(advice: AdviceV2, externalReference: ExternalReferenceV2)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[StorageResult] =
+  def createMessageV2(advice: AdviceV2, externalReference: ExternalReferenceV2)(implicit hc: HeaderCarrier): Future[StorageResult] =
     messageConnector.createV2(secureMessageFromV2(advice, externalReference))
 
   def secureMessageFromV2(advice: AdviceV2, externalReference: ExternalReferenceV2): SecureMessageV2 = {

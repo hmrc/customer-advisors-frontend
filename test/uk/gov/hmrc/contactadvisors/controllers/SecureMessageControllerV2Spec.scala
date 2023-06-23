@@ -31,11 +31,11 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.dependencies.MessageStubV2
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage._
 import uk.gov.hmrc.utils.{ SecureMessageCreatorV2, WithWiremock }
 
-import scala.collection.JavaConverters._
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.jdk.CollectionConverters._
 
 class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock with MessageStubV2 {
 
@@ -91,9 +91,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
     unknownPage,
     unexpectedPage,
     unexpectedV2Page
-  )(appConfig, ec) {
-    def auditSource: String = "customer-advisors-frontend"
-  }
+  )(appConfig, ec)
 
   "GET /customer-advisors-frontend/inbox" should {
     "return 200" in {
@@ -139,46 +137,6 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
         submitAdvice.map(_.tagName()) must be(Some("button"))
         submitAdvice.map(_.text()) must be(Some("Send"))
       }
-
-      val recipientTaxIdentifierName = formElements.find(_.id() == "recipient_taxidentifier_name")
-      withClue("advice recipient taxidentifier name field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
-        }
-      }
-
-      val recipientTaxIdentifierValue = formElements.find(_.id() == "recipient_taxidentifier_value")
-      withClue("advice recipient taxidentifier value field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
-        }
-      }
-
-      val recipientEmail = formElements.find(_.id() == "recipient_email")
-      withClue("advice recipient email field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
-        }
-      }
-
-      val recipientNameLine1 = formElements.find(_.id() == "recipient_name_line1")
-      withClue("advice recipient name line1 field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
-        }
-      }
-
-      val recipientMessageType = formElements.find(_.id() == "messageType")
-      withClue("advice messageType field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
-        }
-      }
     }
   }
 
@@ -221,7 +179,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
     "redirect to the success page when the form submission is successful" in {
       val advice = SecureMessageCreatorV2.adviceWithUncleanContent
 
-      givenMessageRespondsWith(externalRefID, advice, successfulResponse)
+      givenMessageRespondsWith(advice, successfulResponse)
 
       val xssMessage = controller.submitV2()(
         FakeRequest(routes.SecureMessageController.submitV2()).withFormUrlEncodedBody(
@@ -240,7 +198,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
     "Leave script tags in the message and subject" in {
       val advice = SecureMessageCreatorV2.adviceWithUncleanContent
 
-      givenMessageRespondsWith(externalRefID, advice, successfulResponse)
+      givenMessageRespondsWith(advice, successfulResponse)
 
       val xssMessage = controller.submitV2()(
         FakeRequest(routes.SecureMessageController.submitV2()).withFormUrlEncodedBody(
@@ -259,7 +217,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
 
     "redirect and indicate a duplicate message submission" in {
       val advice = SecureMessageCreatorV2.adviceWithCleanContent
-      givenMessageRespondsWith(externalRefID, advice, duplicatedMessage)
+      givenMessageRespondsWith(advice, duplicatedMessage)
 
       val xssMessage = controller.submitV2()(
         FakeRequest(routes.SecureMessageController.submitV2()).withFormUrlEncodedBody(
@@ -278,7 +236,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
 
     "redirect and indicate an unexpected error has occurred when processing the submission" in {
       val advice = SecureMessageCreatorV2.adviceWithCleanContent
-      givenMessageRespondsWith(externalRefID, advice, (1, "asdfasdf"))
+      givenMessageRespondsWith(advice, (1, "asdfasdf"))
 
       val xssMessage = controller.submitV2()(
         FakeRequest(routes.SecureMessageController.submitV2()).withFormUrlEncodedBody(

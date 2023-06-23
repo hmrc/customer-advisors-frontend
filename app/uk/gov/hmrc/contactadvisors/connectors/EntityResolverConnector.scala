@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.contactadvisors.connectors
 
-import javax.inject.{ Inject, Singleton }
 import play.api.http.Status
 import play.api.libs.json.Json
 import uk.gov.hmrc.contactadvisors.domain.UnexpectedFailure
 import uk.gov.hmrc.domain.SaUtr
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, HttpException, Upstream4xxResponse, Upstream5xxResponse }
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, HttpException, UpstreamErrorResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
@@ -41,8 +42,7 @@ class EntityResolverConnector @Inject()(http: HttpClient, servicesConfig: Servic
     )
 
     http.GET[Option[PaperlessPreference]](s"$serviceUrl/portal/preferences/sa/$utr").recoverWith {
-      case Upstream4xxResponse(msg, code, _, _) => unexpectedFailure(msg)
-      case Upstream5xxResponse(msg, code, _, _) => unexpectedFailure(msg)
+      case UpstreamErrorResponse(msg, _, _, _) => unexpectedFailure(msg)
       case http: HttpException =>
         unexpectedFailure(
           s"""[${http.responseCode}] ${http.message}"""

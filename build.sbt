@@ -6,7 +6,7 @@ val appName = "customer-advisors-frontend"
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(majorVersion := 1)
-  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin, BuildInfoPlugin)
+  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(scalaSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(
@@ -21,7 +21,9 @@ lazy val microservice = Project(appName, file("."))
       "-feature",
       "-language:postfixOps",
       "-language:reflectiveCalls",
-      "-Xlint:-missing-interpolator"
+      "-Xlint:-missing-interpolator",
+      "-Wconf:src=routes/.*:s",
+      "-Wconf:src=html/.*:s"
     )
   )
   .configs(IntegrationTest)

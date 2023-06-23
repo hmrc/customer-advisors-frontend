@@ -17,10 +17,9 @@
 package uk.gov.hmrc.contactadvisors.dependencies
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
 import uk.gov.hmrc.contactadvisors.connectors.models.SecureMessage
-
-import java.util.UUID
 
 trait MessageStub {
   val messageEndpoint = "/messages"
@@ -52,7 +51,7 @@ trait MessageStub {
          |}
      """.stripMargin)
 
-  def givenMessageRespondsWith(exteranlRefId: String = UUID.randomUUID().toString, request: SecureMessage, response: (Int, String)): Unit =
+  def givenMessageRespondsWith(request: SecureMessage, response: (Int, String)): StubMapping =
     givenThat(
       post(urlEqualTo(messageEndpoint))
         .withRequestBody(

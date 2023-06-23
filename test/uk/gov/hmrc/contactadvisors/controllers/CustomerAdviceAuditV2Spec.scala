@@ -18,7 +18,7 @@ package uk.gov.hmrc.contactadvisors.controllers
 
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{ clearInvocations, reset, verify, when }
+import org.mockito.Mockito.{ clearInvocations, verify, when }
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.PlaySpec
@@ -30,9 +30,11 @@ import play.api.mvc.{ MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ defaultAwaitTimeout, status }
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
+import uk.gov.hmrc.contactadvisors.connectors.models.ExternalReferenceV2
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
 import uk.gov.hmrc.contactadvisors.views.html.secureMessage._
+import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.EventKeys
 import uk.gov.hmrc.play.audit.http.connector.{ AuditConnector, AuditResult }
@@ -80,7 +82,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
   "SecureMessageController V2" should {
 
     "audit the successful event" in new TestCase {
-      when(secureMessageServiceMock.createMessageV2(any(), any())(any(), any()))
+      when(secureMessageServiceMock.createMessageV2(any[AdviceV2], any[ExternalReferenceV2])(any[HeaderCarrier]))
         .thenReturn(Future.successful(AdviceStored("1234")))
 
       when(secureMessageServiceMock.generateExternalRefID).thenReturn("75d80f37-2cb4-4571-a100-5f8511986fb7")
@@ -89,7 +91,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
       val result: Result = controller.submitV2()(requestV2).futureValue
       status(Future.successful(result)) must be(SEE_OTHER)
 
-      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
 
       val event = dataEventCaptor.getValue
 
@@ -139,7 +141,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     }
 
     "audit the duplicate message event" in new TestCase {
-      when(secureMessageServiceMock.createMessageV2(any(), any())(any(), any()))
+      when(secureMessageServiceMock.createMessageV2(any[AdviceV2], any[ExternalReferenceV2])(any[HeaderCarrier]))
         .thenReturn(Future.successful(AdviceAlreadyExists))
       when(secureMessageServiceMock.generateExternalRefID).thenReturn("75d80f37-2cb4-4571-a100-5f8511986fb7")
 
@@ -147,7 +149,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
       val result = controller.submitV2()(requestV2).futureValue
       status(Future.successful(result)) must be(SEE_OTHER)
 
-      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
 
       val event = dataEventCaptor.getValue
 
@@ -198,14 +200,14 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     }
 
     "audit the unexpected error event" in new TestCase {
-      when(secureMessageServiceMock.createMessageV2(any(), any())(any(), any()))
+      when(secureMessageServiceMock.createMessageV2(any[AdviceV2], any[ExternalReferenceV2])(any[HeaderCarrier]))
         .thenReturn(Future.successful(UnexpectedError("this is the reason")))
       when(secureMessageServiceMock.generateExternalRefID).thenReturn("75d80f37-2cb4-4571-a100-5f8511986fb7")
 
       val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       controller.submitV2()(requestV2).futureValue
 
-      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
 
       val event = dataEventCaptor.getValue
 
@@ -265,13 +267,13 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
   "SecureMessageController" should {
 
     "audit the successful event" in new TestCase {
-      when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
+      when(secureMessageServiceMock.createMessage(any[Advice], any[SaUtr])(any[HeaderCarrier], any[ExecutionContext]))
         .thenReturn(Future.successful(AdviceStored("1234")))
       val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       val result = controller.submit("123456789")(request).futureValue
       status(Future.successful(result)) must be(SEE_OTHER)
 
-      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
 
       val event = dataEventCaptor.getValue
       event.auditSource must be("customer-advisors-frontend")
@@ -281,12 +283,12 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     }
 
     "audit the duplicate message event" in new TestCase {
-      when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
+      when(secureMessageServiceMock.createMessage(any[Advice], any[SaUtr])(any[HeaderCarrier], any[ExecutionContext]))
         .thenReturn(Future.successful(AdviceAlreadyExists))
       val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       val result = controller.submit("123456789")(request).futureValue
       result must be(SeeOther("/secure-message/inbox/123456789/duplicate"))
-      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
 
       val event = dataEventCaptor.getValue
       event.auditSource must be("customer-advisors-frontend")
@@ -296,12 +298,12 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     }
 
     "audit the unknown tax id event" in new TestCase {
-      when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
+      when(secureMessageServiceMock.createMessage(any[Advice], any[SaUtr])(any[HeaderCarrier], any[ExecutionContext]))
         .thenReturn(Future.successful(UnknownTaxId))
       val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       val result: Result = controller.submit("123456789")(request).futureValue
       result must be(SeeOther("/secure-message/inbox/123456789/unknown"))
-      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
 
       val event = dataEventCaptor.getValue
       event.auditSource must be("customer-advisors-frontend")
@@ -311,14 +313,14 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     }
 
     "audit the user not paperless event" in new TestCase {
-      when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
+      when(secureMessageServiceMock.createMessage(any[Advice], any[SaUtr])(any[HeaderCarrier], any[ExecutionContext]))
         .thenReturn(Future.successful(UserIsNotPaperless))
 
       val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       val result = controller.submit("123456789")(request).futureValue
       result must be(SeeOther("/secure-message/inbox/123456789/not-paperless"))
 
-      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
       val event = dataEventCaptor.getValue
       event.auditSource must be("customer-advisors-frontend")
       event.auditType must be("TxFailed")
@@ -327,13 +329,13 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
     }
 
     "audit the unexpected error event" in new TestCase {
-      when(secureMessageServiceMock.createMessage(any(), any())(any(), any()))
+      when(secureMessageServiceMock.createMessage(any[Advice], any[SaUtr])(any[HeaderCarrier], any[ExecutionContext]))
         .thenReturn(Future.successful(UnexpectedError("this is the reason")))
 
       val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       controller.submit("123456789")(request).futureValue
 
-      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any(), any())
+      verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
 
       val event = dataEventCaptor.getValue
       event.auditSource must be("customer-advisors-frontend")

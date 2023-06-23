@@ -33,6 +33,7 @@
 package uk.gov.hmrc.contactadvisors.dependencies
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.apache.commons.codec.binary.Base64
 import org.joda.time.DateTime
 import play.api.http.Status
@@ -59,7 +60,7 @@ trait MessageStubV2 {
          |}
      """.stripMargin)
 
-  def givenMessageRespondsWith(externalRefId: String, advice: AdviceV2, response: (Int, String)): Unit =
+  def givenMessageRespondsWith(advice: AdviceV2, response: (Int, String)): StubMapping =
     givenThat(
       post(urlEqualTo(messageEndpoint))
         .withRequestBody(

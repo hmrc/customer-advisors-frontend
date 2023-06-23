@@ -16,15 +16,11 @@
 
 package uk.gov.hmrc.contactadvisors.controllers
 
-import java.util.UUID
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
 import org.scalatest.Inside
 import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
-import org.scalatestplus.mockito.MockitoSugar.mock
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status
 import play.api.i18n.MessagesApi
@@ -34,15 +30,14 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.dependencies.{ EntityResolverStub, MessageStub }
-import uk.gov.hmrc.contactadvisors.domain.{ AdviceStored, StorageResult }
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage._
 import uk.gov.hmrc.domain.SaUtr
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
 
-import scala.collection.JavaConverters._
+import java.util.UUID
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.jdk.CollectionConverters._
 
 class SecureMessageControllerSpec
     extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock with EntityResolverStub with MessageStub {
@@ -192,46 +187,6 @@ class SecureMessageControllerSpec
         submitAdvice.map(_.tagName()) must be(Some("button"))
         submitAdvice.map(_.text()) must be(Some("Send"))
       }
-
-      val recipientTaxIdentifierName = formElements.find(_.id() == "recipient_taxidentifier_name")
-      withClue("advice recipient taxidentifier name field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
-        }
-      }
-
-      val recipientTaxIdentifierValue = formElements.find(_.id() == "recipient_taxidentifier_value")
-      withClue("advice recipient taxidentifier value field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
-        }
-      }
-
-      val recipientEmail = formElements.find(_.id() == "recipient_email")
-      withClue("advice recipient email field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
-        }
-      }
-
-      val recipientNameLine1 = formElements.find(_.id() == "recipient_name_line1")
-      withClue("advice recipient name line1 field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
-        }
-      }
-
-      val recipientMessageType = formElements.find(_.id() == "messageType")
-      withClue("advice messageType field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
-        }
-      }
     }
   }
 
@@ -263,7 +218,7 @@ class SecureMessageControllerSpec
 
     "Leave script tags in the message and subject" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
-      givenMessageRespondsWith(externalRefID, SecureMessageCreator.uncleanMessage, successfulResponse)
+      givenMessageRespondsWith(SecureMessageCreator.uncleanMessage, successfulResponse)
 
       val xssMessage = controller.submit(utr.value)(
         FakeRequest(routes.SecureMessageController.submit(utr.value)).withFormUrlEncodedBody(
@@ -278,21 +233,21 @@ class SecureMessageControllerSpec
     "redirect to the success page when the form submission is successful" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
 
-      givenMessageRespondsWith(externalRefID, SecureMessageCreator.message, successfulResponse)
+      givenMessageRespondsWith(SecureMessageCreator.message, successfulResponse)
 
       submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/success"
     }
 
     "redirect and indicate a duplicate message submission" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
-      givenMessageRespondsWith(externalRefID, SecureMessageCreator.message, duplicatedMessage)
+      givenMessageRespondsWith(SecureMessageCreator.message, duplicatedMessage)
 
       submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/duplicate"
     }
 
     "redirect and indicate an unexpected error has occurred when processing the submission" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
-      givenMessageRespondsWith(externalRefID, SecureMessageCreator.message, unknownTaxId)
+      givenMessageRespondsWith(SecureMessageCreator.message, unknownTaxId)
 
       submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/unexpected"
     }
@@ -313,34 +268,49 @@ class SecureMessageControllerSpec
 
   "submission result page" should {
     "contain correct message for success" in {
-      controller.success(utr.value)(getRequest) shouldContainPageWithTitleAndSuccessMessage (
-        "Advice creation successful", utr.value,
-        "Thanks. Your reply has been successfully received by the customer's Tax Account secure message Inbox."
-      )
+      controller
+        .success(utr.value)(getRequest)
+        .shouldContainPageWithTitleAndSuccessMessage(
+          "Advice creation successful",
+          utr.value,
+          "Thanks. Your reply has been successfully received by the customer's Tax Account secure message Inbox."
+        )
     }
     "contain correct message for duplicate" in {
-      controller.duplicate(utr.value)(getRequest) shouldContainPageWithTitleAndMessage (
-        "Advice already exists", utr.value,
-        "This message appears to be a duplicate of a message already received in the customer's Tax Account secure message Inbox."
-      )
+      controller
+        .duplicate(utr.value)(getRequest)
+        .shouldContainPageWithTitleAndMessage(
+          "Advice already exists",
+          utr.value,
+          "This message appears to be a duplicate of a message already received in the customer's Tax Account secure message Inbox."
+        )
     }
     "contain correct message for unknown taxid" in {
-      controller.unknown(utr.value)(getRequest) shouldContainPageWithTitleAndMessage (
-        "Unknown UTR", utr.value,
-        "The SA-UTR provided is not recognised by the Digital Tax Platform."
-      )
+      controller
+        .unknown(utr.value)(getRequest)
+        .shouldContainPageWithTitleAndMessage(
+          "Unknown UTR",
+          utr.value,
+          "The SA-UTR provided is not recognised by the Digital Tax Platform."
+        )
     }
     "contain correct message for not paperless user" in {
-      controller.notPaperless(utr.value)(getRequest) shouldContainPageWithTitleAndMessage (
-        "User is not paperless", utr.value,
-        s"The customer is not registered for paperless communications."
-      )
+      controller
+        .notPaperless(utr.value)(getRequest)
+        .shouldContainPageWithTitleAndMessage(
+          "User is not paperless",
+          utr.value,
+          s"The customer is not registered for paperless communications."
+        )
     }
     "contain correct message for unexpected error" in {
-      controller.unexpected(utr.value)(getRequest) shouldContainPageWithTitleAndMessage (
-        "Unexpected error", utr.value,
-        "There is an unexpected problem. There may be an issue with the connection. Please try again."
-      )
+      controller
+        .unexpected(utr.value)(getRequest)
+        .shouldContainPageWithTitleAndMessage(
+          "Unexpected error",
+          utr.value,
+          "There is an unexpected problem. There may be an issue with the connection. Please try again."
+        )
     }
   }
 

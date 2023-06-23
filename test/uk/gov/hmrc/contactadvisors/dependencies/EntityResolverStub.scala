@@ -17,20 +17,20 @@
 package uk.gov.hmrc.contactadvisors.dependencies
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
 
 trait EntityResolverStub {
 
   def entityResolverEndpoint(saUtr: String) = s"/portal/preferences/sa/$saUtr"
 
-  def givenEntityResolverReturnsNotFound(utr: String): Unit =
+  def givenEntityResolverReturnsNotFound(utr: String): StubMapping =
     givenEntityResolverRespondsWith(
       saUtr = utr,
-      status = Status.NOT_FOUND,
-      body = ""
+      status = Status.NOT_FOUND
     )
 
-  def givenEntityResolverReturnsANonPaperlessUser(utr: String): Unit =
+  def givenEntityResolverReturnsANonPaperlessUser(utr: String): StubMapping =
     givenEntityResolverRespondsWith(
       saUtr = utr,
       status = Status.OK,
@@ -41,7 +41,7 @@ trait EntityResolverStub {
         """.stripMargin
     )
 
-  def givenEntityResolverReturnsAPaperlessUser(utr: String): Unit =
+  def givenEntityResolverReturnsAPaperlessUser(utr: String): StubMapping =
     givenEntityResolverRespondsWith(
       saUtr = utr,
       status = Status.OK,
@@ -58,7 +58,7 @@ trait EntityResolverStub {
         """.stripMargin
     )
 
-  def givenEntityResolverRespondsWith(saUtr: String, status: Int, body: String = ""): Unit =
+  def givenEntityResolverRespondsWith(saUtr: String, status: Int, body: String = ""): StubMapping =
     givenThat(
       get(urlEqualTo(entityResolverEndpoint(saUtr)))
         .willReturn(aResponse().withStatus(status).withBody(body)))

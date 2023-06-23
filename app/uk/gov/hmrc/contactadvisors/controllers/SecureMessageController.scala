@@ -17,17 +17,14 @@
 package uk.gov.hmrc.contactadvisors.controllers
 
 import play.api.Logging
-
-import javax.inject.{ Inject, Singleton }
 import play.api.data.Forms._
 import play.api.data._
-import play.api.i18n.Lang.logger
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import uk.gov.hmrc.contactadvisors.connectors.models.ExternalReferenceV2
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage.{ Duplicate, DuplicateV2, Inbox, InboxV2, Not_paperless, Success, SuccessV2, Unexpected, UnexpectedV2, Unknown }
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage._
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.EventKeys
@@ -35,6 +32,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{ DataEvent, EventTypes }
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
@@ -75,40 +73,44 @@ class SecureMessageController @Inject()(
   }
 
   def submit(utr: String) = Action.async { implicit request =>
-    adviceForm.bindFromRequest.fold(
-      formWithErrors =>
-        Future.successful(
-          BadRequest(inboxPage(utr, formWithErrors))
-      ),
-      advice => {
-        val result = secureMessageService.createMessage(advice, SaUtr(utr))
-        customerAdviceAudit.auditAdvice(result, SaUtr(utr))
-        result.map {
-          handleStorageResult(utr)
+    adviceForm
+      .bindFromRequest()
+      .fold(
+        formWithErrors =>
+          Future.successful(
+            BadRequest(inboxPage(utr, formWithErrors))
+        ),
+        advice => {
+          val result = secureMessageService.createMessage(advice, SaUtr(utr))
+          customerAdviceAudit.auditAdvice(result, SaUtr(utr))
+          result.map {
+            handleStorageResult(utr)
+          }
         }
-      }
-    )
+      )
   }
 
   def submitV2() =
     Action.async { implicit request =>
       {
-        adviceFormV2.bindFromRequest.fold(
-          formWithErrors =>
-            Future.successful(
-              {
-                BadRequest(inboxPageV2(formWithErrors))
+        adviceFormV2
+          .bindFromRequest()
+          .fold(
+            formWithErrors =>
+              Future.successful(
+                {
+                  BadRequest(inboxPageV2(formWithErrors))
+                }
+            ),
+            advice => {
+              val externalReference = ExternalReferenceV2(secureMessageService.generateExternalRefID)
+              val result = secureMessageService.createMessageV2(advice, externalReference)
+              customerAdviceAudit.auditAdviceV2(result, advice, externalReference)
+              result.map {
+                handleStorageResultV2(advice.recipientTaxidentifierValue, externalReference.id)
               }
-          ),
-          advice => {
-            val externalReference = ExternalReferenceV2(secureMessageService.generateExternalRefID)
-            val result = secureMessageService.createMessageV2(advice, externalReference)
-            customerAdviceAudit.auditAdviceV2(result, advice, externalReference)
-            result.map {
-              handleStorageResultV2(advice.recipientTaxidentifierValue, externalReference.id)
             }
-          }
-        )
+          )
       }
     }
 
@@ -180,11 +182,11 @@ class SecureMessageController @Inject()(
   )
 
   private def handleStorageResult(utr: String): StorageResult => Result = {
-    case AdviceStored(_)      => Redirect(routes.SecureMessageController.success(utr))
-    case AdviceAlreadyExists  => Redirect(routes.SecureMessageController.duplicate(utr))
-    case UnknownTaxId         => Redirect(routes.SecureMessageController.unknown(utr))
-    case UserIsNotPaperless   => Redirect(routes.SecureMessageController.notPaperless(utr))
-    case UnexpectedError(msg) => Redirect(routes.SecureMessageController.unexpected(utr))
+    case AdviceStored(_)     => Redirect(routes.SecureMessageController.success(utr))
+    case AdviceAlreadyExists => Redirect(routes.SecureMessageController.duplicate(utr))
+    case UnknownTaxId        => Redirect(routes.SecureMessageController.unknown(utr))
+    case UserIsNotPaperless  => Redirect(routes.SecureMessageController.notPaperless(utr))
+    case UnexpectedError(_)  => Redirect(routes.SecureMessageController.unexpected(utr))
   }
 
   private def handleStorageResultV2(recipientTaxIdentifierValue: String, externalRef: String): StorageResult => Result = {
@@ -226,9 +228,7 @@ class CustomerAdviceAudit @Inject()(auditConnector: AuditConnector)(implicit ec:
             createEvent(Map("reason" -> s"Unexpected Error: ${ex.getMessage}"), EventTypes.Failed, "Message Not Stored")
         }
         .foreach { ev =>
-          auditConnector.sendEvent(ev).recover {
-            case err => logger.error(s"Could not audit event ${err.getMessage}")
-          }
+          auditConnector.sendEvent(ev)
         }
     }
   }
@@ -287,9 +287,7 @@ class CustomerAdviceAudit @Inject()(auditConnector: AuditConnector)(implicit ec:
             createEvent(Map("reason" -> s"Unexpected Error: ${ex.getMessage}"), EventTypes.Failed, "Message Not Stored")
         }
         .foreach { ev =>
-          auditConnector.sendEvent(ev).recover {
-            case err => logger.error(s"Could not audit event ${err.getMessage}")
-          }
+          auditConnector.sendEvent(ev)
         }
     }
   }
