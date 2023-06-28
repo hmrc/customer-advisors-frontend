@@ -20,8 +20,7 @@ import org.joda.time.{ LocalDate }
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{ Json, OFormat, _ }
 import uk.gov.hmrc.domain.SaUtr
-import play.api.libs.json.JodaWrites.{ JodaDateTimeWrites => _, _ }
-import play.api.libs.json.JodaReads._
+import play.api.libs.json.JodaWrites.{ JodaDateTimeWrites => _ }
 
 final case class Details(formId: String, statutory: Boolean, paperSent: Boolean, batchId: Option[String])
 object Details {

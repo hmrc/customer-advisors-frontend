@@ -16,23 +16,21 @@
 
 package uk.gov.hmrc.contactadvisors.connectors
 
-import javax.inject.{ Inject, Singleton }
 import play.api.libs.json.Json
-import play.api.{ Configuration, Environment }
 import play.mvc.Http.Status
-import uk.gov.hmrc.contactadvisors.connectors.models.{ ExternalReference, ExternalReferenceV2, SecureMessage, SecureMessageV2 }
+import uk.gov.hmrc.contactadvisors.connectors.models.{ SecureMessage, SecureMessageV2 }
 import uk.gov.hmrc.contactadvisors.domain._
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, Upstream4xxResponse }
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, UpstreamErrorResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import scala.concurrent.Future
+import javax.inject.{ Inject, Singleton }
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfig) extends Status {
+class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends Status {
 
   lazy val serviceUrl: String = servicesConfig.baseUrl("message")
-
-  import scala.concurrent.ExecutionContext.Implicits.global
 
   def create(secureMessage: SecureMessage)(implicit hc: HeaderCarrier): Future[StorageResult] = {
 
@@ -46,8 +44,8 @@ class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfi
         case MessageResponse(messageId) => AdviceStored(messageId)
       }
       .recover {
-        case Upstream4xxResponse(conflictMessage, Status.CONFLICT, _, _) => AdviceAlreadyExists
-        case ex                                                          => UnexpectedError(ex.getMessage)
+        case UpstreamErrorResponse(_, Status.CONFLICT, _, _) => AdviceAlreadyExists
+        case ex                                              => UnexpectedError(ex.getMessage)
       }
   }
 
@@ -63,8 +61,8 @@ class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfi
         case MessageResponse(messageId) => AdviceStored(messageId)
       }
       .recover {
-        case Upstream4xxResponse(conflictMessage, Status.CONFLICT, _, _) => AdviceAlreadyExists
-        case ex                                                          => UnexpectedError(ex.getMessage)
+        case UpstreamErrorResponse(_, Status.CONFLICT, _, _) => AdviceAlreadyExists
+        case ex                                              => UnexpectedError(ex.getMessage)
       }
   }
 
