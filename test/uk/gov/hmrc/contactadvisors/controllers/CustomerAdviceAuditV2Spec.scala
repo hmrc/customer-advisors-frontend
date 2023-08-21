@@ -18,7 +18,7 @@ package uk.gov.hmrc.contactadvisors.controllers
 
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{clearInvocations, verify, when}
+import org.mockito.Mockito.{ clearInvocations, verify, when }
 import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -27,9 +27,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.SEE_OTHER
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.SeeOther
-import play.api.mvc.{MessagesControllerComponents, Result}
+import play.api.mvc.{ MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{defaultAwaitTimeout, status}
+import play.api.test.Helpers.{ defaultAwaitTimeout, status }
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.connectors.models.ExternalReferenceV2
 import uk.gov.hmrc.contactadvisors.domain._
@@ -38,10 +38,10 @@ import uk.gov.hmrc.contactadvisors.views.html.secureMessage._
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.EventKeys
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
+import uk.gov.hmrc.play.audit.http.connector.{ AuditConnector, AuditResult }
 import uk.gov.hmrc.play.audit.model.DataEvent
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOneAppPerSuite {
 
@@ -296,7 +296,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
       val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       val result = controller.submit("123456789")(request).futureValue
       result must be(SeeOther("/secure-message/inbox/123456789/duplicate"))
-      
+
       eventually {
         verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
 
@@ -314,7 +314,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
       val dataEventCaptor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
       val result: Result = controller.submit("123456789")(request).futureValue
       result must be(SeeOther("/secure-message/inbox/123456789/unknown"))
-      
+
       eventually {
         verify(auditConnectorMock).sendEvent(dataEventCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
 
