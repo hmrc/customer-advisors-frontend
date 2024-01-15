@@ -1,16 +1,17 @@
-import uk.gov.hmrc.DefaultBuildSettings.{ defaultSettings, scalaSettings }
+import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings, targetJvm}
 import uk.gov.hmrc.DefaultBuildSettings
 
 val appName = "customer-advisors-frontend"
 
+Global / majorVersion := 1
+Global / scalaVersion := "2.13.12"
+
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
-  .settings(majorVersion := 1)
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(scalaSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(
-    scalaVersion := "2.13.8",
+    targetJvm := "jvm-11",
     libraryDependencies ++= AppDependencies.dependencies,
     Test / parallelExecution := false,
     Test / fork := false,
@@ -27,10 +28,10 @@ lazy val microservice = Project(appName, file("."))
       "-Wconf:src=html/.*:s"
     )
   )
-  .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
-  .settings(
-    DefaultBuildSettings.integrationTestSettings()
-  )
   .settings(resolvers ++= Seq(Resolver.jcenterRepo))
   .settings(ScoverageSettings())
+
+
+lazy val it = (project in file("it"))
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test")
