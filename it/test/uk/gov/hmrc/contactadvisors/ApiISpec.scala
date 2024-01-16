@@ -19,8 +19,8 @@ package uk.gov.hmrc.contactadvisors
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterAll
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalatest.time.{Milliseconds, Span}
+import org.scalatest.concurrent.{ Eventually, ScalaFutures }
+import org.scalatest.time.{ Milliseconds, Span }
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.http.Status._
@@ -31,7 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.duration._
 
 class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Eventually with GuiceOneServerPerSuite {
-  
+
   def externalServices: Seq[String] = Seq.empty
 
   protected def startTimeout: FiniteDuration = 240.seconds
@@ -75,7 +75,7 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
         document.select(".govuk-list li").get(2).text() must include("External Ref:")
       }
     }
-    
+
     "redirect to the unexpected page when the form submission is unsuccessful" in {
 
       val content = DateTime.now().toString

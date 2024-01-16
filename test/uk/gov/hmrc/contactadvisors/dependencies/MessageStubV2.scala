@@ -35,9 +35,10 @@ package uk.gov.hmrc.contactadvisors.dependencies
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.apache.commons.codec.binary.Base64
-import org.joda.time.DateTime
 import play.api.http.Status
 import uk.gov.hmrc.contactadvisors.domain.AdviceV2
+
+import java.time.LocalDate
 
 trait MessageStubV2 {
   val messageEndpoint = "/messages"
@@ -82,7 +83,7 @@ trait MessageStubV2 {
                | "messageType":"${advice.messageType}",
                | "subject":"${advice.subject}",
                | "content":"${new String(Base64.encodeBase64(advice.content.getBytes("UTF-8")))}",
-               | "validFrom":"${DateTime.now().toLocalDate}",
+               | "validFrom":"${LocalDate.now()}",
                | "alertQueue":"PRIORITY"
                |}
          """.stripMargin,

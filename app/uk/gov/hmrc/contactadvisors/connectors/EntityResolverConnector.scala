@@ -17,15 +17,15 @@
 package uk.gov.hmrc.contactadvisors.connectors
 
 import play.api.http.Status
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.contactadvisors.domain.UnexpectedFailure
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, HttpException, UpstreamErrorResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.{ Inject, Singleton }
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class EntityResolverConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends Status {

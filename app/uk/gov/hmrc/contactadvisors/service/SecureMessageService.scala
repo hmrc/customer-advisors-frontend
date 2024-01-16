@@ -18,13 +18,12 @@ package uk.gov.hmrc.contactadvisors.service
 
 import java.util.{ Base64, UUID }
 import javax.inject.{ Inject, Singleton }
-import org.joda.time.DateTime
 import uk.gov.hmrc.contactadvisors.connectors.models._
 import uk.gov.hmrc.contactadvisors.connectors.{ EntityResolverConnector, MessageConnector, PaperlessPreference }
 import uk.gov.hmrc.contactadvisors.domain._
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
-
+import java.time.LocalDate
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
@@ -53,7 +52,7 @@ class SecureMessageService @Inject()(messageConnector: MessageConnector, entityR
     val messageType = "advisor-reply"
     val subject = advice.subject
     val content = new String(Base64.getEncoder.encode(advice.message.getBytes("UTF-8")))
-    val validFrom = DateTime.now().toLocalDate
+    val validFrom = LocalDate.now()
     val details = Details(formId = "CA001", statutory = false, paperSent = false, batchId = None)
     SecureMessage(recipient, externalReference, messageType, subject, content, validFrom, details)
   }
@@ -68,7 +67,7 @@ class SecureMessageService @Inject()(messageConnector: MessageConnector, entityR
     val messageType = advice.messageType
     val subject = advice.subject
     val content = new String(Base64.getEncoder.encode(advice.content.getBytes("UTF-8")))
-    val validFrom = DateTime.now().toLocalDate
+    val validFrom = LocalDate.now()
 
     SecureMessageV2(recipient, externalReference, messageType, subject, content, validFrom)
   }

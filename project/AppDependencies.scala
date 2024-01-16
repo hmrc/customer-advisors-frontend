@@ -10,7 +10,6 @@ object AppDependencies {
     "uk.gov.hmrc"            %% "domain-play-30"             % "9.0.0",
     "uk.gov.hmrc"            %% "play-frontend-hmrc-play-30" % "8.3.0",
     "uk.gov.hmrc"            %% "play-partials-play-30"      % "9.1.0",
-    "com.typesafe.play"      %% "play-json-joda"             % "2.9.2",
     "org.jsoup"              %  "jsoup"                      % "1.17.2",
     "com.vladsch.flexmark"   %  "flexmark-all"               % "0.35.10" % Test,
     "org.pegdown"            %  "pegdown"                    % "1.6.0"   % Test,

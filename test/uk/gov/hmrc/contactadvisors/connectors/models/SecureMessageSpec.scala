@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.contactadvisors.connectors.models
 
-import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import uk.gov.hmrc.domain.SaUtr
+
+import java.time.LocalDate
 
 class SecureMessageSpec extends PlaySpec {
 
@@ -31,7 +32,7 @@ class SecureMessageSpec extends PlaySpec {
       val messageType = "advisor-reply"
       val subject = "This is a response to your HMRC request"
       val content = "This is the content of the secure message"
-      val validFrom = DateTime.parse("2017-04-21").toLocalDate
+      val validFrom = LocalDate.parse("2017-04-21")
       val details = Details(formId = "CA001", statutory = true, paperSent = false, batchId = None)
       val message = SecureMessage(recipient, externalReference, messageType, subject, content, validFrom, details)
 
