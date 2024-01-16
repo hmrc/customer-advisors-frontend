@@ -52,10 +52,7 @@ case class SecureMessage(
   details: Details)
 
 object SecureMessage {
-  implicit val dateFormatDefault: Format[LocalDate] = new Format[LocalDate] {
-    override def reads(json: JsValue): JsResult[LocalDate] = json.validate[String].map(LocalDate.parse)
-    override def writes(o: LocalDate): JsValue = Json.toJson(o.toString)
-  }
+  implicit val dateFormatDefault: Format[LocalDate] = Format(Reads.DefaultLocalDateReads, Writes.DefaultLocalDateWrites)
   implicit val formats: OFormat[SecureMessage] = Json.format[SecureMessage]
 }
 
@@ -90,9 +87,6 @@ object ExternalReferenceV2 {
 }
 
 object SecureMessageV2 {
-  implicit val dateFormatDefault: Format[LocalDate] = new Format[LocalDate] {
-    override def reads(json: JsValue): JsResult[LocalDate] = json.validate[String].map(LocalDate.parse)
-    override def writes(o: LocalDate): JsValue = Json.toJson(o.toString)
-  }
+  implicit val dateFormatDefault: Format[LocalDate] = Format(Reads.DefaultLocalDateReads, Writes.DefaultLocalDateWrites)
   implicit val formats: OFormat[SecureMessageV2] = Json.format[SecureMessageV2]
 }
