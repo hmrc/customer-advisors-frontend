@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.contactadvisors
 
-import org.joda.time.DateTime
+import java.time.LocalDate
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{ Eventually, ScalaFutures }
@@ -40,7 +40,7 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
 
   "POST /customer-advisors-frontend/submit" should {
     "redirect to the success page when the form submission is successful" in {
-      val content = DateTime.now().toString
+      val content = LocalDate.now().toString
       val fhddsRef = "XZFH00000100024"
       val wsClient = app.injector.instanceOf[WSClient]
       val response = wsClient
@@ -78,7 +78,7 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
 
     "redirect to the unexpected page when the form submission is unsuccessful" in {
 
-      val content = DateTime.now().toString
+      val content = LocalDate.now().toString
       val fhddsRef = "XZFH00000100024"
       val wrongEmail = "foobar"
       val wsClient = app.injector.instanceOf[WSClient]
