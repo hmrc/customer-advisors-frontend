@@ -45,7 +45,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOneAppPerSuite {
 
-  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val appConfig = app.injector.instanceOf[FrontendAppConfig]
   val controllerComponents = app.injector.instanceOf[MessagesControllerComponents]

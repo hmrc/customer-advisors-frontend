@@ -1,6 +1,8 @@
 import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings, targetJvm}
 import uk.gov.hmrc.DefaultBuildSettings
 
+import scala.collection.immutable.Seq
+
 val appName = "customer-advisors-frontend"
 
 Global / majorVersion := 1
@@ -28,6 +30,11 @@ lazy val microservice = Project(appName, file("."))
       "-Wconf:src=html/.*:s"
     )
   )
+  .settings(
+    Test / scalacOptions := Seq(
+      "-Ywarn-value-discard"
+    )
+  )
   .settings(resolvers ++= Seq(Resolver.jcenterRepo))
   .settings(ScoverageSettings())
 
@@ -35,3 +42,8 @@ lazy val microservice = Project(appName, file("."))
 lazy val it = (project in file("it"))
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
+  .settings(
+    Test / scalacOptions := Seq(
+      "-Ywarn-value-discard"
+    )
+  )

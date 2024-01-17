@@ -48,7 +48,7 @@ class TestEntityResolverConnector @Inject()(
 class EntityResolverConnectorSpec
     extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with WithWiremock with TableDrivenPropertyChecks with IntegrationPatience {
 
-  implicit val hc = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   override lazy val dependenciesPort = 8015
 
