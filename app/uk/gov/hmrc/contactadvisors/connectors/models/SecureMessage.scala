@@ -16,20 +16,19 @@
 
 package uk.gov.hmrc.contactadvisors.connectors.models
 
-import org.joda.time.{ LocalDate }
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{ Json, OFormat, _ }
 import uk.gov.hmrc.domain.SaUtr
-import play.api.libs.json.JodaWrites.{ JodaDateTimeWrites => _ }
+import java.time.LocalDate
 
 final case class Details(formId: String, statutory: Boolean, paperSent: Boolean, batchId: Option[String])
 object Details {
-  implicit val formats = Json.format[Details]
+  implicit val formats: OFormat[Details] = Json.format[Details]
 }
 
 final case class ExternalReference(id: String, source: String)
 object ExternalReference {
-  implicit val formats = Json.format[ExternalReference]
+  implicit val formats: OFormat[ExternalReference] = Json.format[ExternalReference]
 }
 
 final case class Recipient(taxIdentifier: SaUtr)
@@ -40,7 +39,7 @@ object Recipient {
       (__ \ "value").format[String]
   )((_, value) => SaUtr(value), (m => (m.name, m.value)))
 
-  implicit val formats = Json.format[Recipient]
+  implicit val formats: OFormat[Recipient] = Json.format[Recipient]
 }
 
 case class SecureMessage(
@@ -53,11 +52,8 @@ case class SecureMessage(
   details: Details)
 
 object SecureMessage {
-  implicit val dateFormatDefault = new Format[LocalDate] {
-    override def reads(json: JsValue): JsResult[LocalDate] = JodaReads.DefaultJodaLocalDateReads.reads(json)
-    override def writes(o: LocalDate): JsValue = JodaWrites.DefaultJodaLocalDateWrites.writes(o)
-  }
-  implicit val formats = Json.format[SecureMessage]
+  implicit val dateFormatDefault: Format[LocalDate] = Format(Reads.DefaultLocalDateReads, Writes.DefaultLocalDateWrites)
+  implicit val formats: OFormat[SecureMessage] = Json.format[SecureMessage]
 }
 
 case class SecureMessageV2(
@@ -76,7 +72,7 @@ final case class RecipientV2(taxIdentifier: FHDDSTaxIdentifier, name: TaxpayerNa
 object RecipientV2 {
 
   implicit val fhddsTaxIdformats: OFormat[FHDDSTaxIdentifier] = Json.format[FHDDSTaxIdentifier]
-  implicit val taxpayerFormat = Json.format[TaxpayerName]
+  implicit val taxpayerFormat: OFormat[TaxpayerName] = Json.format[TaxpayerName]
   implicit val formats: OFormat[RecipientV2] = Json.format[RecipientV2]
 }
 
@@ -87,13 +83,10 @@ object TaxpayerName {}
 final case class ExternalReferenceV2(id: String, source: String = "sees")
 
 object ExternalReferenceV2 {
-  implicit val formats = Json.format[ExternalReferenceV2]
+  implicit val formats: OFormat[ExternalReferenceV2] = Json.format[ExternalReferenceV2]
 }
 
 object SecureMessageV2 {
-  implicit val dateFormatDefault = new Format[LocalDate] {
-    override def reads(json: JsValue): JsResult[LocalDate] = JodaReads.DefaultJodaLocalDateReads.reads(json)
-    override def writes(o: LocalDate): JsValue = JodaWrites.DefaultJodaLocalDateWrites.writes(o)
-  }
-  implicit val formats = Json.format[SecureMessageV2]
+  implicit val dateFormatDefault: Format[LocalDate] = Format(Reads.DefaultLocalDateReads, Writes.DefaultLocalDateWrites)
+  implicit val formats: OFormat[SecureMessageV2] = Json.format[SecureMessageV2]
 }

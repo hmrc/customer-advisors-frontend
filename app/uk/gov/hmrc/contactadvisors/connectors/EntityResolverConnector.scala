@@ -17,7 +17,7 @@
 package uk.gov.hmrc.contactadvisors.connectors
 
 import play.api.http.Status
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.contactadvisors.domain.UnexpectedFailure
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -54,5 +54,5 @@ class EntityResolverConnector @Inject()(http: HttpClient, servicesConfig: Servic
 case class PaperlessPreference(digital: Boolean)
 
 object PaperlessPreference {
-  implicit val formats = Json.format[PaperlessPreference]
+  implicit val formats: OFormat[PaperlessPreference] = Json.format[PaperlessPreference]
 }

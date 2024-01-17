@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.contactadvisors.connectors
 
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, OFormat }
 import play.mvc.Http.Status
 import uk.gov.hmrc.contactadvisors.connectors.models.{ SecureMessage, SecureMessageV2 }
 import uk.gov.hmrc.contactadvisors.domain._
@@ -71,5 +71,5 @@ class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfi
 case class MessageResponse(id: String)
 
 object MessageResponse {
-  implicit val formats = Json.format[MessageResponse]
+  implicit val formats: OFormat[MessageResponse] = Json.format[MessageResponse]
 }
