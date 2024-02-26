@@ -1,5 +1,4 @@
-import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings, targetJvm}
-import uk.gov.hmrc.DefaultBuildSettings
+import uk.gov.hmrc.DefaultBuildSettings.{ defaultSettings, scalaSettings, targetJvm }
 
 val appName = "customer-advisors-frontend"
 
@@ -15,8 +14,7 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= AppDependencies.dependencies,
     Test / parallelExecution := false,
     Test / fork := false,
-    Test / 
-    retrieveManaged := true,
+    Test / retrieveManaged := true,
     update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     routesGenerator := InjectedRoutesGenerator,
     scalacOptions ++= List(
@@ -35,7 +33,6 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(resolvers ++= Seq(Resolver.jcenterRepo))
   .settings(ScoverageSettings())
-
 
 lazy val it = (project in file("it"))
   .enablePlugins(PlayScala)
