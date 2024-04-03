@@ -108,7 +108,7 @@ class SecureMessageControllerSpec
     "show main banner" in {
       val result = controller.inbox(customer_utr)(getRequest)
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").html().contains("govuk-header__service-name") must be(true)
+      document.getElementsByTag("header").html().contains("govuk-header__logotype") must be(true)
     }
 
     "have the expected elements on the form" in {
@@ -158,7 +158,7 @@ class SecureMessageControllerSpec
     "show main banner" in {
       val result = controller.inboxV2()(getRequest)
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").html().contains("govuk-header__service-name") must be(true)
+      document.getElementsByTag("header").html().contains("govuk-header__logotype") must be(true)
     }
 
     "have the expected elements on the form" in {
@@ -328,7 +328,7 @@ class SecureMessageControllerSpec
       charset(result) must be(Some("utf-8"))
 
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").html().contains("govuk-header__service-name") must be(true)
+      document.getElementsByTag("header").html().contains("govuk-header__logotype") must be(true)
 
       withClue("result page title") {
         document.title() must be(title)
@@ -351,7 +351,7 @@ class SecureMessageControllerSpec
       charset(result) must be(Some("utf-8"))
 
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").html().contains("govuk-header__service-name") must be(true)
+      document.getElementsByTag("header").html().contains("govuk-header__logotype") must be(true)
 
       withClue("result page title") {
         document.title() must be(title)
