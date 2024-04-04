@@ -108,7 +108,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
     "show main banner" in {
       val result = controller.inboxV2()(getRequest)
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
+      document.getElementsByTag("header").html().contains("govuk-header__logotype") must be(true)
     }
 
     "have the expected elements on the form" in {
@@ -263,7 +263,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
 
-      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
+      document.getElementsByTag("header").html().contains("govuk-header__logotype") must be(true)
 
       withClue("result page title") {
         document.title() must be("Advice creation successful")
@@ -278,7 +278,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       contentType(result) must be(Some("text/html"))
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
+      document.getElementsByTag("header").html().contains("govuk-header__logotype") must be(true)
 
       withClue("result page title") {
         document.title() must be("Advice already exists")
@@ -291,7 +291,7 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
       contentType(result) must be(Some("text/html"))
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("header").html().contains("govuk-header__logotype-crown") must be(true)
+      document.getElementsByTag("header").html().contains("govuk-header__logotype") must be(true)
 
       withClue("result page title") {
         document.title() must be("Unexpected error")
