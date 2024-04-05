@@ -1,5 +1,5 @@
 $govuk-assets-path: "/secure-message-frontend/assets/lib/govuk-frontend/dist/govuk/assets/";
 $hmrc-assets-path: "/secure-message-frontend/assets/lib/hmrc-frontend/hmrc/";
 
-@import "lib/govuk-frontend/govuk/all";
+@import "lib/govuk-frontend/dist/govuk/all";
 @import "lib/hmrc-frontend/hmrc/all";
