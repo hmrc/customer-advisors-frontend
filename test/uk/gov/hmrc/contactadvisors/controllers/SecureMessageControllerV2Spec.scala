@@ -37,7 +37,9 @@ import uk.gov.hmrc.utils.{ SecureMessageCreatorV2, WithWiremock }
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.jdk.CollectionConverters._
 
-class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock with MessageStubV2 {
+class SecureMessageControllerV2Spec
+    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock
+    with MessageStubV2 {
 
   implicit lazy override val app: Application = new GuiceApplicationBuilder()
     .configure(
@@ -121,9 +123,8 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
 
       val adviceSubject = formElements.find(_.id() == "subject")
       withClue("advice subject field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
+        Inside.inside(adviceSubject) { case Some(element) =>
+          element.tagName() must be("input")
         }
       }
 
@@ -312,7 +313,8 @@ class SecureMessageControllerV2Spec extends PlaySpec with GuiceOneAppPerSuite wi
   "SuccessV2 page" must {
     "include taxId, messageId and externalRef" in {
       val request =
-        FakeRequest("GET", "/customer-advisors-frontend/inbox/success").withFlash(("taxid", "123456789"), ("messageId", "8888"), ("externalRef", "9999"))
+        FakeRequest("GET", "/customer-advisors-frontend/inbox/success")
+          .withFlash(("taxid", "123456789"), ("messageId", "8888"), ("externalRef", "9999"))
       val result = controller.successV2()(request)
       val pageContent = contentAsString(result)
       pageContent must include("123456789")

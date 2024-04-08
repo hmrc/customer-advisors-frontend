@@ -36,7 +36,7 @@ import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class TestMessageConnector @Inject()(
+class TestMessageConnector @Inject() (
   http: HttpClient,
   servicesConfig: ServicesConfig
 )(implicit ec: ExecutionContext)
@@ -46,7 +46,8 @@ class TestMessageConnector @Inject()(
 }
 
 class MessageConnectorSpec()
-    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with WithWiremock with TableDrivenPropertyChecks with IntegrationPatience {
+    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with WithWiremock with TableDrivenPropertyChecks
+    with IntegrationPatience {
 
   val messagePort = 58008
   override lazy val wireMockServer = new WireMockServer(wireMockConfig().port(messagePort))
@@ -70,7 +71,11 @@ class MessageConnectorSpec()
 
   "message connector" should {
     "return the message id from the response" in new TestCase {
-      givenThat(post(urlEqualTo(expectedPath)).willReturn(aResponse().withStatus(Status.CREATED).withBody("""{"id":"12341234"}""")))
+      givenThat(
+        post(urlEqualTo(expectedPath)).willReturn(
+          aResponse().withStatus(Status.CREATED).withBody("""{"id":"12341234"}""")
+        )
+      )
 
       connector.create(secureMessage).futureValue must be(AdviceStored("12341234"))
     }
@@ -90,15 +95,16 @@ class MessageConnectorSpec()
             .willReturn(
               aResponse()
                 .withStatus(statusCode)
-                .withBody(errorMessage.toString())))
+                .withBody(errorMessage.toString())
+            )
+        )
 
         val response: StorageResult = connector.create(secureMessage).futureValue
         response match {
-          case UnexpectedError(reason) => {
+          case UnexpectedError(reason) =>
             reason must include(expectedPath)
             reason must include(statusCode.toString)
             reason must include("'{\"reason\":\"something went wrong\"}'")
-          }
           case _ => fail("Unexpected storage result")
         }
       }
@@ -107,8 +113,11 @@ class MessageConnectorSpec()
     "fail when an IOException occurs when saving" in new TestCase {
       givenThat(
         post(urlEqualTo(expectedPath))
-          .willReturn(aResponse()
-            .withFault(Fault.RANDOM_DATA_THEN_CLOSE)))
+          .willReturn(
+            aResponse()
+              .withFault(Fault.RANDOM_DATA_THEN_CLOSE)
+          )
+      )
 
       val response = connector.create(secureMessage).futureValue
       response must be(UnexpectedError("Remotely closed"))

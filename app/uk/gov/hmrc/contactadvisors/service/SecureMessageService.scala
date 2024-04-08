@@ -27,11 +27,17 @@ import java.time.LocalDate
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class SecureMessageService @Inject()(messageConnector: MessageConnector, entityResolverConnector: EntityResolverConnector) {
+class SecureMessageService @Inject() (
+  messageConnector: MessageConnector,
+  entityResolverConnector: EntityResolverConnector
+) {
 
   def generateExternalRefID: String = UUID.randomUUID().toString
 
-  def createMessage(advice: Advice, saUtr: SaUtr)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[StorageResult] =
+  def createMessage(advice: Advice, saUtr: SaUtr)(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[StorageResult] =
     entityResolverConnector
       .validPaperlessUserWith(saUtr)
       .flatMap {
@@ -42,8 +48,8 @@ class SecureMessageService @Inject()(messageConnector: MessageConnector, entityR
         case Some(PaperlessPreference(false)) => Future.successful(UserIsNotPaperless)
         case None                             => Future.successful(UnknownTaxId)
       }
-      .recover {
-        case UnexpectedFailure(reason) => UnexpectedError(s"Creation of the advice failed. Reason: $reason")
+      .recover { case UnexpectedFailure(reason) =>
+        UnexpectedError(s"Creation of the advice failed. Reason: $reason")
       }
 
   def secureMessageFrom(advice: Advice, saUtr: SaUtr): SecureMessage = {
@@ -57,7 +63,9 @@ class SecureMessageService @Inject()(messageConnector: MessageConnector, entityR
     SecureMessage(recipient, externalReference, messageType, subject, content, validFrom, details)
   }
 
-  def createMessageV2(advice: AdviceV2, externalReference: ExternalReferenceV2)(implicit hc: HeaderCarrier): Future[StorageResult] =
+  def createMessageV2(advice: AdviceV2, externalReference: ExternalReferenceV2)(implicit
+    hc: HeaderCarrier
+  ): Future[StorageResult] =
     messageConnector.createV2(secureMessageFromV2(advice, externalReference))
 
   def secureMessageFromV2(advice: AdviceV2, externalReference: ExternalReferenceV2): SecureMessageV2 = {

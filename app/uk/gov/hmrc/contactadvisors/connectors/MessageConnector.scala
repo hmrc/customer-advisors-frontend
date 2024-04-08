@@ -28,7 +28,8 @@ import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends Status {
+class MessageConnector @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(implicit ec: ExecutionContext)
+    extends Status {
 
   lazy val serviceUrl: String = servicesConfig.baseUrl("message")
 
@@ -40,8 +41,8 @@ class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfi
 
     http
       .POST[SecureMessage, MessageResponse](url = createMessageAPIurl, body = secureMessage)
-      .map {
-        case MessageResponse(messageId) => AdviceStored(messageId)
+      .map { case MessageResponse(messageId) =>
+        AdviceStored(messageId)
       }
       .recover {
         case UpstreamErrorResponse(_, Status.CONFLICT, _, _) => AdviceAlreadyExists
@@ -57,8 +58,8 @@ class MessageConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfi
 
     http
       .POST[SecureMessageV2, MessageResponse](url = createMessageAPIurl, body = secureMessage)
-      .map {
-        case MessageResponse(messageId) => AdviceStored(messageId)
+      .map { case MessageResponse(messageId) =>
+        AdviceStored(messageId)
       }
       .recover {
         case UpstreamErrorResponse(_, Status.CONFLICT, _, _) => AdviceAlreadyExists

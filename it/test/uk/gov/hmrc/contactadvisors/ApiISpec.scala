@@ -45,15 +45,17 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
       val wsClient = app.injector.instanceOf[WSClient]
       val response = wsClient
         .url(resource("secure-message/customer-advisors-frontend/submit"))
-        .post(Map(
-          "content"                     -> s"${content}21",
-          "subject"                     -> "mysubject",
-          "recipientTaxidentifierName"  -> "sautr",
-          "recipientTaxidentifierValue" -> fhddsRef,
-          "recipientEmail"              -> "test@test.com",
-          "recipientNameLine1"          -> "line1",
-          "messageType"                 -> "mType"
-        ))
+        .post(
+          Map(
+            "content"                     -> s"${content}21",
+            "subject"                     -> "mysubject",
+            "recipientTaxidentifierName"  -> "sautr",
+            "recipientTaxidentifierValue" -> fhddsRef,
+            "recipientEmail"              -> "test@test.com",
+            "recipientNameLine1"          -> "line1",
+            "messageType"                 -> "mType"
+          )
+        )
         .futureValue(timeout = timeout(Span(1000, Milliseconds)))
 
       response.status must be(OK)
@@ -85,15 +87,17 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
 
       val response = wsClient
         .url(resource("secure-message/customer-advisors-frontend/submit"))
-        .post(Map(
-          "content"                     -> s"${content}21",
-          "subject"                     -> "mysubject",
-          "recipientTaxidentifierName"  -> "sautr",
-          "recipientTaxidentifierValue" -> s"$fhddsRef",
-          "recipientEmail"              -> s"$wrongEmail",
-          "recipientNameLine1"          -> "rLine1",
-          "messageType"                 -> "mType"
-        ))
+        .post(
+          Map(
+            "content"                     -> s"${content}21",
+            "subject"                     -> "mysubject",
+            "recipientTaxidentifierName"  -> "sautr",
+            "recipientTaxidentifierValue" -> s"$fhddsRef",
+            "recipientEmail"              -> s"$wrongEmail",
+            "recipientNameLine1"          -> "rLine1",
+            "messageType"                 -> "mType"
+          )
+        )
         .futureValue
 
       response.status must be(OK)

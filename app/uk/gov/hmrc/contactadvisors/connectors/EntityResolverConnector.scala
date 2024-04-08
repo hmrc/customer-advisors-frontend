@@ -28,7 +28,9 @@ import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class EntityResolverConnector @Inject()(http: HttpClient, servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends Status {
+class EntityResolverConnector @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(implicit
+  ec: ExecutionContext
+) extends Status {
 
   lazy val serviceUrl = servicesConfig.baseUrl("entity-resolver")
 

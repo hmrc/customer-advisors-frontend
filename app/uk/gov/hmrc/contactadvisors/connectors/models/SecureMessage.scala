@@ -37,7 +37,7 @@ object Recipient {
   implicit val taxIdWrites: Format[SaUtr] = (
     (__ \ "name").format[String] and
       (__ \ "value").format[String]
-  )((_, value) => SaUtr(value), (m => (m.name, m.value)))
+  )((_, value) => SaUtr(value), m => (m.name, m.value))
 
   implicit val formats: OFormat[Recipient] = Json.format[Recipient]
 }
@@ -49,7 +49,8 @@ case class SecureMessage(
   subject: String,
   content: String,
   validFrom: LocalDate,
-  details: Details)
+  details: Details
+)
 
 object SecureMessage {
   implicit val dateFormatDefault: Format[LocalDate] = Format(Reads.DefaultLocalDateReads, Writes.DefaultLocalDateWrites)
@@ -63,7 +64,8 @@ case class SecureMessageV2(
   subject: String,
   content: String,
   validFrom: LocalDate,
-  alertQueue: String = "PRIORITY")
+  alertQueue: String = "PRIORITY"
+)
 
 case class FHDDSTaxIdentifier(value: String, name: String)
 
