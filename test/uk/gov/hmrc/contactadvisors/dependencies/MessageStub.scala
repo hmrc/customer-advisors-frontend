@@ -31,7 +31,8 @@ trait MessageStub {
          |{
          |  "reason": "Duplicated message content or external reference ID"
          |}
-     """.stripMargin)
+     """.stripMargin
+    )
 
   val unknownTaxId =
     (
@@ -40,7 +41,8 @@ trait MessageStub {
          |{
          |  "reason": "Unknown tax identifier name XYZ"
          |}
-     """.stripMargin)
+     """.stripMargin
+    )
 
   val successfulResponse: (Int, String) =
     (
@@ -49,7 +51,8 @@ trait MessageStub {
          |{
          |  "id" : "507f1f77bcf86cd799439011"
          |}
-     """.stripMargin)
+     """.stripMargin
+    )
 
   def givenMessageRespondsWith(request: SecureMessage, response: (Int, String)): StubMapping =
     givenThat(
@@ -82,5 +85,6 @@ trait MessageStub {
             true
           )
         )
-        .willReturn(aResponse().withStatus(response._1).withBody(response._2)))
+        .willReturn(aResponse().withStatus(response._1).withBody(response._2))
+    )
 }

@@ -1,4 +1,4 @@
-import uk.gov.hmrc.DefaultBuildSettings.{ defaultSettings, scalaSettings, targetJvm }
+import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings, targetJvm}
 
 val appName = "customer-advisors-frontend"
 
@@ -42,3 +42,11 @@ lazy val it = (project in file("it"))
       "-Ywarn-value-discard"
     )
   )
+
+Test / test := (Test / test)
+  .dependsOn(scalafmtCheckAll)
+  .value
+
+it / test := (it / Test / test)
+  .dependsOn(scalafmtCheckAll, it/scalafmtCheckAll)
+  .value

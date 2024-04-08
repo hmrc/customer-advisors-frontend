@@ -40,8 +40,10 @@ class SecureMessageServiceSpec extends PlaySpec with MockitoSugar with ScalaFutu
 
     "handle failure in creating the message" in new TestCase {
 
-      when(entityResolverConnectorMock.validPaperlessUserWith(validSaUtr)).thenReturn(Future.successful(Some(PaperlessPreference(true))))
-      when(messageConnectorMock.create(messageCaptor.capture())(any[HeaderCarrier])).thenReturn(Future.successful(AdviceAlreadyExists))
+      when(entityResolverConnectorMock.validPaperlessUserWith(validSaUtr))
+        .thenReturn(Future.successful(Some(PaperlessPreference(true))))
+      when(messageConnectorMock.create(messageCaptor.capture())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(AdviceAlreadyExists))
 
       val storageResult = secureMessageService.createMessage(advice, validSaUtr).futureValue
 
@@ -50,7 +52,8 @@ class SecureMessageServiceSpec extends PlaySpec with MockitoSugar with ScalaFutu
 
     "handle case when taxpayer is not paperless" in new TestCase {
 
-      when(entityResolverConnectorMock.validPaperlessUserWith(validSaUtr)).thenReturn(Future.successful(Some(PaperlessPreference(false))))
+      when(entityResolverConnectorMock.validPaperlessUserWith(validSaUtr))
+        .thenReturn(Future.successful(Some(PaperlessPreference(false))))
 
       val storageResult = secureMessageService.createMessage(advice, validSaUtr).futureValue
 
@@ -76,7 +79,9 @@ class SecureMessageServiceSpec extends PlaySpec with MockitoSugar with ScalaFutu
       val storageResult = secureMessageService.createMessage(advice, validSaUtr).futureValue
 
       verify(messageConnectorMock, never()).create(any[SecureMessage])(any[HeaderCarrier])
-      storageResult must be(UnexpectedError("Creation of the advice failed. Reason: Could not determine if user with utr is paperless"))
+      storageResult must be(
+        UnexpectedError("Creation of the advice failed. Reason: Could not determine if user with utr is paperless")
+      )
     }
   }
 

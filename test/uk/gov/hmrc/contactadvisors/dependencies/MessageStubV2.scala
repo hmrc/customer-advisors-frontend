@@ -50,7 +50,8 @@ trait MessageStubV2 {
          |{
          |  "reason": "Duplicated message content or external reference ID"
          |}
-     """.stripMargin)
+     """.stripMargin
+    )
 
   val successfulResponse: (Int, String) =
     (
@@ -59,7 +60,8 @@ trait MessageStubV2 {
          |{
          |  "id" : "507f1f77bcf86cd799439011"
          |}
-     """.stripMargin)
+     """.stripMargin
+    )
 
   def givenMessageRespondsWith(advice: AdviceV2, response: (Int, String)): StubMapping =
     givenThat(
@@ -91,5 +93,6 @@ trait MessageStubV2 {
             true
           )
         )
-        .willReturn(aResponse().withStatus(response._1).withBody(response._2)))
+        .willReturn(aResponse().withStatus(response._1).withBody(response._2))
+    )
 }

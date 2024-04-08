@@ -21,9 +21,10 @@ import play.api.Configuration
 import javax.inject.{ Inject, Singleton }
 
 @Singleton
-class AppConfig @Inject()(
+class AppConfig @Inject() (
   config: Configuration
 ) {
-  val welshLanguageSupportEnabled: Boolean = config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
+  val welshLanguageSupportEnabled: Boolean =
+    config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
 
 }

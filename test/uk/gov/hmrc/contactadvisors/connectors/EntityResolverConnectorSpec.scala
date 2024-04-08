@@ -36,17 +36,19 @@ import uk.gov.hmrc.utils.WithWiremock
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class TestEntityResolverConnector @Inject()(
+class TestEntityResolverConnector @Inject() (
   http: HttpClient,
   val runModeConfiguration: Configuration,
   servicesConfig: ServicesConfig,
-  val environment: Environment)(implicit ec: ExecutionContext)
+  val environment: Environment
+)(implicit ec: ExecutionContext)
     extends EntityResolverConnector(http, servicesConfig)(ec) {
   override lazy val serviceUrl: String = s"http://localhost:8015"
 }
 
 class EntityResolverConnectorSpec
-    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with WithWiremock with TableDrivenPropertyChecks with IntegrationPatience {
+    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with WithWiremock with TableDrivenPropertyChecks
+    with IntegrationPatience {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -65,7 +67,8 @@ class EntityResolverConnectorSpec
               "mailboxFull" -> false,
               "status"      -> "verified"
             )
-          ))
+          )
+        )
       )
       connector.validPaperlessUserWith(utr).futureValue must be(Some(PaperlessPreference(true)))
     }
@@ -86,9 +89,8 @@ class EntityResolverConnectorSpec
       s"return unexpected failure when the response has status $statusCode" in new TestCase {
         entityResolverReturns(statusCode)
 
-        inside(connector.validPaperlessUserWith(utr).failed.futureValue) {
-          case UnexpectedFailure(msg) =>
-            msg must include(statusCode.toString)
+        inside(connector.validPaperlessUserWith(utr).failed.futureValue) { case UnexpectedFailure(msg) =>
+          msg must include(statusCode.toString)
         }
       }
     }

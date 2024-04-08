@@ -40,7 +40,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.jdk.CollectionConverters._
 
 class SecureMessageControllerSpec
-    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock with EntityResolverStub with MessageStub {
+    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock
+    with EntityResolverStub with MessageStub {
 
   implicit lazy override val app: Application = new GuiceApplicationBuilder()
     .configure(
@@ -121,11 +122,10 @@ class SecureMessageControllerSpec
 
       val adviceSubject = formElements.find(_.id() == "subject")
       withClue("advice subject field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
-            element.attr("type") must be("hidden")
-            element.`val`() must be("Response to your enquiry from HMRC customer services")
+        Inside.inside(adviceSubject) { case Some(element) =>
+          element.tagName() must be("input")
+          element.attr("type") must be("hidden")
+          element.`val`() must be("Response to your enquiry from HMRC customer services")
         }
       }
 
@@ -171,9 +171,8 @@ class SecureMessageControllerSpec
 
       val adviceSubject = formElements.find(_.id() == "subject")
       withClue("advice subject field") {
-        Inside.inside(adviceSubject) {
-          case Some(element) =>
-            element.tagName() must be("input")
+        Inside.inside(adviceSubject) { case Some(element) =>
+          element.tagName() must be("input")
         }
       }
 
@@ -198,7 +197,10 @@ class SecureMessageControllerSpec
         )
       )
 
-      Jsoup.parse(contentAsString(emptySubject)).getElementsByClass("govuk-input govuk-input--error").asScala must have size 1
+      Jsoup
+        .parse(contentAsString(emptySubject))
+        .getElementsByClass("govuk-input govuk-input--error")
+        .asScala must have size 1
       status(emptySubject) must be(BAD_REQUEST)
 
       val emptyMessage = controller.submit(customer_utr)(
@@ -207,7 +209,10 @@ class SecureMessageControllerSpec
         )
       )
 
-      Jsoup.parse(contentAsString(emptyMessage)).getElementsByClass("govuk-textarea govuk-textarea--error").asScala must have size 1
+      Jsoup
+        .parse(contentAsString(emptyMessage))
+        .getElementsByClass("govuk-textarea govuk-textarea--error")
+        .asScala must have size 1
       status(emptyMessage) must be(BAD_REQUEST)
 
       val emptyFormFields = controller.submit(customer_utr)(FakeRequest())

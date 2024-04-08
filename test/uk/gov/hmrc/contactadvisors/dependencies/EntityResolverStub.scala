@@ -61,5 +61,6 @@ trait EntityResolverStub {
   def givenEntityResolverRespondsWith(saUtr: String, status: Int, body: String = ""): StubMapping =
     givenThat(
       get(urlEqualTo(entityResolverEndpoint(saUtr)))
-        .willReturn(aResponse().withStatus(status).withBody(body)))
+        .willReturn(aResponse().withStatus(status).withBody(body))
+    )
 }

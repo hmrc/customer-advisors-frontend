@@ -103,7 +103,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
           event.auditType must be("TxSucceeded")
         }
         withClue("event eventId") {
-          event.eventId must include regex ("^[0-9a-fA-F-]+$")
+          event.eventId must include regex "^[0-9a-fA-F-]+$"
         }
         withClue("event tags.transactionName") {
           event.tags.get(EventKeys.TransactionName) must not {
@@ -123,14 +123,14 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
           event.detail.get("externalRef") must not {
             be(None)
           }
-          event.detail.get("externalRef").get must include regex ("^[0-9a-fA-F-]+$")
+          event.detail.get("externalRef").get must include regex "^[0-9a-fA-F-]+$"
         }
 
         withClue("event detail.fhddsRef") {
           event.detail.get("fhddsRef") must not {
             be(None)
           }
-          event.detail.get("fhddsRef").get must include regex ("XZFH00000100024")
+          event.detail.get("fhddsRef").get must include regex "XZFH00000100024"
         }
 
         withClue("event detail.messageType") {
@@ -163,7 +163,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
           event.auditType must be("TxSucceeded")
         }
         withClue("event eventId") {
-          event.eventId must include regex ("^[0-9a-fA-F-]+$")
+          event.eventId must include regex "^[0-9a-fA-F-]+$"
         }
         withClue("event tags.transactionName") {
           event.tags.get(EventKeys.TransactionName) must not {
@@ -183,14 +183,14 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
           event.detail.get("fhddsRef") must not {
             be(None)
           }
-          event.detail.get("fhddsRef").get must include regex ("XZFH00000100024")
+          event.detail.get("fhddsRef").get must include regex "XZFH00000100024"
         }
 
         withClue("event details.externalRef") {
           event.detail.get("externalRef") must not {
             be(None)
           }
-          event.detail.get("externalRef").get must include regex ("^[0-9a-fA-F-]+$")
+          event.detail.get("externalRef").get must include regex "^[0-9a-fA-F-]+$"
         }
 
         withClue("event detail.messageType") {
@@ -222,7 +222,7 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
           event.auditType must be("TxFailed")
         }
         withClue("event eventId") {
-          event.eventId must include regex ("^[0-9a-fA-F-]+$")
+          event.eventId must include regex "^[0-9a-fA-F-]+$"
         }
         withClue("event tags.transactionName") {
           event.tags.get(EventKeys.TransactionName) must not {
@@ -242,14 +242,14 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
           event.detail.get("fhddsRef") must not {
             be(None)
           }
-          event.detail.get("fhddsRef").get must include regex ("XZFH00000100024")
+          event.detail.get("fhddsRef").get must include regex "XZFH00000100024"
         }
 
         withClue("event details.externalRef") {
           event.detail.get("externalRef") must not {
             be(None)
           }
-          event.detail.get("externalRef").get must include regex ("^[0-9a-fA-F-]+$")
+          event.detail.get("externalRef").get must include regex "^[0-9a-fA-F-]+$"
         }
 
         withClue("event detail.messageType") {
@@ -364,7 +364,8 @@ class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOne
 
   trait TestCase {
     clearInvocations(auditConnectorMock)
-    when(auditConnectorMock.sendEvent(any[DataEvent])(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(AuditResult.Success))
+    when(auditConnectorMock.sendEvent(any[DataEvent])(any[HeaderCarrier], any[ExecutionContext]))
+      .thenReturn(Future.successful(AuditResult.Success))
     val controller = new SecureMessageController(
       controllerComponents,
       customerAdviceAudit,
