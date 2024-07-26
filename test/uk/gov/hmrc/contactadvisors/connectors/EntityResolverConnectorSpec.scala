@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.contactadvisors.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 
 import javax.inject.{ Inject, Singleton }
 import org.scalatest.Inside._
@@ -85,7 +85,7 @@ class EntityResolverConnectorSpec
       connector.validPaperlessUserWith(utr).futureValue must be(None)
     }
 
-    forAll(Table("statusCode", 400, 401, 403, 415, 500)) { statusCode: Int =>
+    forAll(Table("statusCode", 400, 401, 403, 415, 500)) { statusCode =>
       s"return unexpected failure when the response has status $statusCode" in new TestCase {
         entityResolverReturns(statusCode)
 

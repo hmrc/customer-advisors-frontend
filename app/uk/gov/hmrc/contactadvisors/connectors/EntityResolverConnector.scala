@@ -23,7 +23,7 @@ import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, HttpException, UpstreamErrorResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
+import java.net.URI
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -43,7 +43,7 @@ class EntityResolverConnector @Inject() (http: HttpClient, servicesConfig: Servi
       )
     )
 
-    http.GET[Option[PaperlessPreference]](s"$serviceUrl/portal/preferences/sa/$utr").recoverWith {
+    http.GET[Option[PaperlessPreference]](new URI(s"$serviceUrl/portal/preferences/sa/$utr").toURL).recoverWith {
       case UpstreamErrorResponse(msg, _, _, _) => unexpectedFailure(msg)
       case http: HttpException =>
         unexpectedFailure(

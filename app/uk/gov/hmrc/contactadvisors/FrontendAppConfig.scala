@@ -33,8 +33,8 @@ class FrontendAppConfig @Inject() (val runModeConfiguration: Configuration, val 
   private def loadConfig(key: String) =
     runModeConfiguration.getOptional[String](key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
-  override lazy val analyticsToken = loadConfig(s"google-analytics.token")
-  override lazy val analyticsHost = loadConfig(s"google-analytics.host")
+  override val analyticsToken = loadConfig(s"google-analytics.token")
+  override val analyticsHost = loadConfig(s"google-analytics.host")
   override val reportAProblemPartialUrl: String = "unused"
   override val reportAProblemNonJSUrl: String = "unused"
 }

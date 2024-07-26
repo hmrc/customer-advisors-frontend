@@ -86,7 +86,8 @@ class MessageConnectorSpec()
         connector.create(secureMessage).futureValue must be(AdviceAlreadyExists)
 
       }
-    forAll(Table("statusCode", 400, 401, 404, 415, 500)) { statusCode: Int =>
+
+    forAll(Table("statusCode", 400, 401, 404, 415, 500)) { statusCode =>
       s"return Failure with reason for status=$statusCode" in new TestCase {
 
         val errorMessage = Json.obj("reason" -> "something went wrong")

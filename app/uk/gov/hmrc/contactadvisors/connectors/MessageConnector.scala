@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, UpstreamErrorResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.net.{ URI, URL }
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -32,13 +33,10 @@ class MessageConnector @Inject() (http: HttpClient, servicesConfig: ServicesConf
     extends Status {
 
   lazy val serviceUrl: String = servicesConfig.baseUrl("message")
+  lazy val createMessageAPIurl: URL = new URI(s"$serviceUrl/messages").toURL
+  implicit val messageFormats: OFormat[MessageResponse] = MessageResponse.formats
 
-  def create(secureMessage: SecureMessage)(implicit hc: HeaderCarrier): Future[StorageResult] = {
-
-    implicit val messageFormats = MessageResponse.formats
-
-    val createMessageAPIurl: String = s"$serviceUrl/messages"
-
+  def create(secureMessage: SecureMessage)(implicit hc: HeaderCarrier): Future[StorageResult] =
     http
       .POST[SecureMessage, MessageResponse](url = createMessageAPIurl, body = secureMessage)
       .map { case MessageResponse(messageId) =>
@@ -48,14 +46,8 @@ class MessageConnector @Inject() (http: HttpClient, servicesConfig: ServicesConf
         case UpstreamErrorResponse(_, Status.CONFLICT, _, _) => AdviceAlreadyExists
         case ex                                              => UnexpectedError(ex.getMessage)
       }
-  }
 
-  def createV2(secureMessage: SecureMessageV2)(implicit hc: HeaderCarrier): Future[StorageResult] = {
-
-    implicit val messageFormats = MessageResponse.formats
-
-    val createMessageAPIurl: String = s"$serviceUrl/messages"
-
+  def createV2(secureMessage: SecureMessageV2)(implicit hc: HeaderCarrier): Future[StorageResult] =
     http
       .POST[SecureMessageV2, MessageResponse](url = createMessageAPIurl, body = secureMessage)
       .map { case MessageResponse(messageId) =>
@@ -65,7 +57,6 @@ class MessageConnector @Inject() (http: HttpClient, servicesConfig: ServicesConf
         case UpstreamErrorResponse(_, Status.CONFLICT, _, _) => AdviceAlreadyExists
         case ex                                              => UnexpectedError(ex.getMessage)
       }
-  }
 
 }
 
