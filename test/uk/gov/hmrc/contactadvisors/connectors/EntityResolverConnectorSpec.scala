@@ -29,7 +29,8 @@ import play.api.libs.json.{ JsObject, Json }
 import play.api.{ Configuration, Environment }
 import uk.gov.hmrc.contactadvisors.domain.UnexpectedFailure
 import uk.gov.hmrc.domain.SaUtr
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.utils.WithWiremock
 
@@ -37,7 +38,7 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class TestEntityResolverConnector @Inject() (
-  http: HttpClient,
+  http: HttpClientV2,
   val runModeConfiguration: Configuration,
   servicesConfig: ServicesConfig,
   val environment: Environment

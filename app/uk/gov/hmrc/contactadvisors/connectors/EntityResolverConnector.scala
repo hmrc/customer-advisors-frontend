@@ -21,14 +21,16 @@ import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.contactadvisors.domain.UnexpectedFailure
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, HttpException, UpstreamErrorResponse }
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpException, UpstreamErrorResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
 import java.net.URI
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class EntityResolverConnector @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(implicit
+class EntityResolverConnector @Inject() (http: HttpClientV2, servicesConfig: ServicesConfig)(implicit
   ec: ExecutionContext
 ) extends Status {
 
@@ -43,13 +45,16 @@ class EntityResolverConnector @Inject() (http: HttpClient, servicesConfig: Servi
       )
     )
 
-    http.GET[Option[PaperlessPreference]](new URI(s"$serviceUrl/portal/preferences/sa/$utr").toURL).recoverWith {
-      case UpstreamErrorResponse(msg, _, _, _) => unexpectedFailure(msg)
-      case http: HttpException =>
-        unexpectedFailure(
-          s"""[${http.responseCode}] ${http.message}"""
-        )
-    }
+    http
+      .get(new URI(s"$serviceUrl/portal/preferences/sa/$utr").toURL)
+      .execute[Option[PaperlessPreference]]
+      .recoverWith {
+        case UpstreamErrorResponse(msg, _, _, _) => unexpectedFailure(msg)
+        case http: HttpException =>
+          unexpectedFailure(
+            s"""[${http.responseCode}] ${http.message}"""
+          )
+      }
   }
 }
 

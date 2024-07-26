@@ -28,7 +28,8 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.libs.json.Json
 import uk.gov.hmrc.contactadvisors.domain.{ AdviceAlreadyExists, AdviceStored, StorageResult, UnexpectedError }
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
 
@@ -37,7 +38,7 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class TestMessageConnector @Inject() (
-  http: HttpClient,
+  http: HttpClientV2,
   servicesConfig: ServicesConfig
 )(implicit ec: ExecutionContext)
     extends MessageConnector(http, servicesConfig)(ec) {

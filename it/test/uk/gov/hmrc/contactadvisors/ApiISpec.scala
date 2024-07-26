@@ -27,7 +27,7 @@ import play.api.http.Status._
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.contactadvisors.UrlHelper.-/
 import uk.gov.hmrc.http.HeaderCarrier
-
+import play.api.libs.ws.DefaultBodyWritables.writeableOf_urlEncodedSimpleForm
 import scala.concurrent.duration._
 
 class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Eventually with GuiceOneServerPerSuite {
