@@ -23,3 +23,11 @@ lazy val microservice = Project(appName, file("."))
 lazy val it = (project in file("it"))
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
+
+Test / test := (Test / test)
+  .dependsOn(scalafmtCheckAll)
+  .value
+
+it / test := (it / Test / test)
+  .dependsOn(scalafmtCheckAll, it/scalafmtCheckAll)
+  .value
