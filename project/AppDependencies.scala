@@ -10,7 +10,7 @@ object AppDependencies {
     "uk.gov.hmrc"            %% "play-frontend-hmrc-play-30" % "10.3.0",
     "org.jsoup"              % "jsoup"                       % "1.17.2",
     "uk.gov.hmrc"            %% "bootstrap-test-play-30"     % "9.0.0" % Test,
-    "org.scalatestplus"      %% "mockito-3-4"                % "3.2.10.0" % Test,
+    "org.scalatestplus" %% "mockito-4-11" % "3.2.17.0" % Test,
     "org.scalatestplus.play" %% "scalatestplus-play"         % "7.0.0" % Test
   )
 }

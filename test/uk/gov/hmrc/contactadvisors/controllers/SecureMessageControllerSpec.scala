@@ -232,7 +232,7 @@ class SecureMessageControllerSpec
         )
       )
 
-      xssMessage returnsRedirectTo s"/inbox/$utr/success"
+      xssMessage.returnsRedirectTo(s"/inbox/$utr/success")
     }
 
     "redirect to the success page when the form submission is successful" in {
@@ -240,33 +240,33 @@ class SecureMessageControllerSpec
 
       givenMessageRespondsWith(SecureMessageCreator.message, successfulResponse)
 
-      submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/success"
+      submissionOfCompletedForm().returnsRedirectTo(s"/inbox/$utr/success")
     }
 
     "redirect and indicate a duplicate message submission" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
       givenMessageRespondsWith(SecureMessageCreator.message, duplicatedMessage)
 
-      submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/duplicate"
+      submissionOfCompletedForm().returnsRedirectTo(s"/inbox/$utr/duplicate")
     }
 
     "redirect and indicate an unexpected error has occurred when processing the submission" in {
       givenEntityResolverReturnsAPaperlessUser(utr.value)
       givenMessageRespondsWith(SecureMessageCreator.message, unknownTaxId)
 
-      submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/unexpected"
+      submissionOfCompletedForm().returnsRedirectTo(s"/inbox/$utr/unexpected")
     }
 
     "redirect and indicate that the user has not opted in for paperless communications" in {
       givenEntityResolverReturnsANonPaperlessUser(utr.value)
 
-      submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/not-paperless"
+      submissionOfCompletedForm().returnsRedirectTo(s"/inbox/$utr/not-paperless")
     }
 
     "redirect and indicate a submission for unknown utr" in {
       givenEntityResolverReturnsNotFound(utr.value)
 
-      submissionOfCompletedForm() returnsRedirectTo s"/inbox/$utr/unknown"
+      submissionOfCompletedForm().returnsRedirectTo(s"/inbox/$utr/unknown")
     }
 
   }

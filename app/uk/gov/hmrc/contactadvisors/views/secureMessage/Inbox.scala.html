@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 @import uk.gov.hmrc.contactadvisors.domain.Advice
 
-@this(layout: Layout, formCSFR: FormWithCSRF, govukInput: GovukInput, govukFieldset : GovukFieldset, govukTextarea: GovukTextarea, govukButton: GovukButton)
+@this(layout: Layout, formCSFR: FormWithCSRF, govukInput: GovukInput, govukTextarea: GovukTextarea, govukButton: GovukButton)
 
 
 @(utr: String, adviceForm: Form[Advice])(implicit request: Request[?], messages: Messages, appConfig : uk.gov.hmrc.contactadvisors.FrontendAppConfig )
