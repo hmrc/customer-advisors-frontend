@@ -20,14 +20,14 @@ import java.time.LocalDate
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{ Eventually, ScalaFutures }
-import org.scalatest.time.{ Milliseconds, Span }
+import org.scalatest.time.{ Milliseconds, Seconds, Span }
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.http.Status._
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.contactadvisors.UrlHelper.-/
 import uk.gov.hmrc.http.HeaderCarrier
-
+import play.api.libs.ws.DefaultBodyWritables.writeableOf_urlEncodedSimpleForm
 import scala.concurrent.duration._
 
 class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Eventually with GuiceOneServerPerSuite {
@@ -56,7 +56,7 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
             "messageType"                 -> "mType"
           )
         )
-        .futureValue(timeout = timeout(Span(1000, Milliseconds)))
+        .futureValue(timeout = timeout(Span(2, Seconds)))
 
       response.status must be(OK)
 
@@ -98,7 +98,7 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
             "messageType"                 -> "mType"
           )
         )
-        .futureValue
+        .futureValue(timeout = timeout(Span(2, Seconds)))
 
       response.status must be(OK)
       val body = response.body

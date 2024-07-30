@@ -194,7 +194,7 @@ class SecureMessageControllerV2Spec
         )
       )
 
-      xssMessage returnsRedirectTo s"/customer-advisors-frontend/inbox/success"
+      xssMessage.returnsRedirectTo(s"/customer-advisors-frontend/inbox/success")
     }
     "Leave script tags in the message and subject" in {
       val advice = SecureMessageCreatorV2.adviceWithUncleanContent
@@ -213,7 +213,7 @@ class SecureMessageControllerV2Spec
         )
       )
 
-      xssMessage returnsRedirectTo s"/customer-advisors-frontend/inbox/success"
+      xssMessage.returnsRedirectTo(s"/customer-advisors-frontend/inbox/success")
     }
 
     "redirect and indicate a duplicate message submission" in {
@@ -232,7 +232,7 @@ class SecureMessageControllerV2Spec
         )
       )
 
-      xssMessage returnsRedirectTo s"/customer-advisors-frontend/inbox/duplicate"
+      xssMessage.returnsRedirectTo("/customer-advisors-frontend/inbox/duplicate")
     }
 
     "redirect and indicate an unexpected error has occurred when processing the submission" in {
@@ -251,7 +251,7 @@ class SecureMessageControllerV2Spec
         )
       )
 
-      xssMessage returnsRedirectTo s"/customer-advisors-frontend/inbox/unexpected"
+      xssMessage.returnsRedirectTo("/customer-advisors-frontend/inbox/unexpected")
     }
 
   }

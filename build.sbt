@@ -1,35 +1,21 @@
-import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings, targetJvm}
+import uk.gov.hmrc.DefaultBuildSettings.{ defaultSettings, scalaSettings }
 
 val appName = "customer-advisors-frontend"
 
-Global / majorVersion := 1
-Global / scalaVersion := "2.13.12"
+Global / majorVersion := 2
+Global / scalaVersion := "3.4.2"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
-  .settings(scalaSettings: _*)
-  .settings(defaultSettings(): _*)
+  .settings(scalaSettings *)
+  .settings(defaultSettings() *)
   .settings(
-    targetJvm := "jvm-11",
     libraryDependencies ++= AppDependencies.dependencies,
     Test / parallelExecution := false,
     Test / fork := false,
     Test / retrieveManaged := true,
     update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    routesGenerator := InjectedRoutesGenerator,
-    scalacOptions ++= List(
-      "-feature",
-      "-language:postfixOps",
-      "-language:reflectiveCalls",
-      "-Xlint:-missing-interpolator",
-      "-Wconf:src=routes/.*:s",
-      "-Wconf:src=html/.*:s"
-    )
-  )
-  .settings(
-    Test / scalacOptions := Seq(
-      "-Ywarn-value-discard"
-    )
+    routesGenerator := InjectedRoutesGenerator
   )
   .settings(resolvers ++= Seq(Resolver.jcenterRepo))
   .settings(ScoverageSettings())
@@ -37,11 +23,6 @@ lazy val microservice = Project(appName, file("."))
 lazy val it = (project in file("it"))
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
-  .settings(
-    Test / scalacOptions := Seq(
-      "-Ywarn-value-discard"
-    )
-  )
 
 Test / test := (Test / test)
   .dependsOn(scalafmtCheckAll)

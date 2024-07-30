@@ -28,7 +28,8 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.libs.json.Json
 import uk.gov.hmrc.contactadvisors.domain.{ AdviceAlreadyExists, AdviceStored, StorageResult, UnexpectedError }
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
 
@@ -37,7 +38,7 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class TestMessageConnector @Inject() (
-  http: HttpClient,
+  http: HttpClientV2,
   servicesConfig: ServicesConfig
 )(implicit ec: ExecutionContext)
     extends MessageConnector(http, servicesConfig)(ec) {
@@ -86,7 +87,8 @@ class MessageConnectorSpec()
         connector.create(secureMessage).futureValue must be(AdviceAlreadyExists)
 
       }
-    forAll(Table("statusCode", 400, 401, 404, 415, 500)) { statusCode: Int =>
+
+    forAll(Table("statusCode", 400, 401, 404, 415, 500)) { statusCode =>
       s"return Failure with reason for status=$statusCode" in new TestCase {
 
         val errorMessage = Json.obj("reason" -> "something went wrong")

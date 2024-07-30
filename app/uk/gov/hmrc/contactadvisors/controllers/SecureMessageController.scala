@@ -162,7 +162,7 @@ class SecureMessageController @Inject() (
     mapping(
       "subject" -> nonEmptyText,
       "message" -> nonEmptyText
-    )(Advice.apply)(Advice.unapply)
+    )(Advice.apply)(ad => Option(Tuple.fromProductTyped(ad)))
   )
 
   def adviceFormV2 = Form[AdviceV2](
@@ -174,7 +174,7 @@ class SecureMessageController @Inject() (
       "recipientEmail"              -> nonEmptyText,
       "recipientNameLine1"          -> nonEmptyText,
       "messageType"                 -> nonEmptyText
-    )(AdviceV2.apply)(AdviceV2.unapply)
+    )(AdviceV2.apply)(ad => Option(Tuple.fromProductTyped(ad)))
   )
 
   private def handleStorageResult(utr: String): StorageResult => Result = {

@@ -19,17 +19,17 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 @import uk.gov.hmrc.contactadvisors.domain.Advice
 
-@this(layout: Layout, formCSFR: FormWithCSRF, govukInput: GovukInput, govukFieldset : GovukFieldset, govukTextarea: GovukTextarea, govukButton: GovukButton)
+@this(layout: Layout, formCSFR: FormWithCSRF, govukInput: GovukInput, govukTextarea: GovukTextarea, govukButton: GovukButton)
 
 
-@(utr: String, adviceForm: Form[Advice])(implicit request: Request[_], messages: Messages, appConfig : uk.gov.hmrc.contactadvisors.FrontendAppConfig )
+@(utr: String, adviceForm: Form[Advice])(implicit request: Request[?], messages: Messages, appConfig : uk.gov.hmrc.contactadvisors.FrontendAppConfig )
 
 @layout(pageTitle = Some("Contact Advisor Response Form")) {
 
 <h2 class="govuk-heading-m">Please complete and submit the form below in order to reply to @utr</h2>
 
 
-@formCSFR(action = uk.gov.hmrc.contactadvisors.controllers.routes.SecureMessageController.submit(utr), 'id -> "form-submit-customer-advice") {
+@formCSFR(action = uk.gov.hmrc.contactadvisors.controllers.routes.SecureMessageController.submit(utr), Symbol("id") -> "form-submit-customer-advice") {
 
 @govukTextarea(Textarea(
 label = Label(

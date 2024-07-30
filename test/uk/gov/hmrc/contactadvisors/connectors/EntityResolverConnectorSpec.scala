@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.contactadvisors.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 
 import javax.inject.{ Inject, Singleton }
 import org.scalatest.Inside._
@@ -29,7 +29,8 @@ import play.api.libs.json.{ JsObject, Json }
 import play.api.{ Configuration, Environment }
 import uk.gov.hmrc.contactadvisors.domain.UnexpectedFailure
 import uk.gov.hmrc.domain.SaUtr
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.utils.WithWiremock
 
@@ -37,7 +38,7 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class TestEntityResolverConnector @Inject() (
-  http: HttpClient,
+  http: HttpClientV2,
   val runModeConfiguration: Configuration,
   servicesConfig: ServicesConfig,
   val environment: Environment
@@ -85,7 +86,7 @@ class EntityResolverConnectorSpec
       connector.validPaperlessUserWith(utr).futureValue must be(None)
     }
 
-    forAll(Table("statusCode", 400, 401, 403, 415, 500)) { statusCode: Int =>
+    forAll(Table("statusCode", 400, 401, 403, 415, 500)) { statusCode =>
       s"return unexpected failure when the response has status $statusCode" in new TestCase {
         entityResolverReturns(statusCode)
 

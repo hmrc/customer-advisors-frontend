@@ -19,13 +19,10 @@ package uk.gov.hmrc.contactadvisors.connectors.models
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import uk.gov.hmrc.domain.SaUtr
-
 import java.time.LocalDate
 
 class SecureMessageSpec extends PlaySpec {
-
   "SecureMessage.format" should {
-
     "convert an AdviceCreationBody into the expected json" in {
       val recipient = Recipient(SaUtr("987654321"))
       val externalReference = ExternalReference("123412342314", "customer-advisor")
@@ -64,5 +61,4 @@ class SecureMessageSpec extends PlaySpec {
       Json.toJson(message) must be(Json.parse(expectedJson))
     }
   }
-
 }

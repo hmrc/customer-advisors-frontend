@@ -20,9 +20,9 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
 
-@this(layout: Layout, formCSFR: FormWithCSRF, govukInput: GovukInput, govukFieldset : GovukFieldset, govukTextarea: GovukTextarea, govukButton: GovukButton)
+@this(layout: Layout, formCSFR: FormWithCSRF, govukInput: GovukInput, govukTextarea: GovukTextarea, govukButton: GovukButton)
 
-@(adviceForm: Form[AdviceV2])(implicit  request: Request[_], messages: Messages, appConfig : uk.gov.hmrc.contactadvisors.FrontendAppConfig)
+@(adviceForm: Form[AdviceV2])(implicit  request: Request[?], messages: Messages, appConfig : uk.gov.hmrc.contactadvisors.FrontendAppConfig)
 
 
 @layout(pageTitle = Some("Contact Advisor Response Form")) {
@@ -33,7 +33,7 @@
 
 
 
-@formCSFR(action = uk.gov.hmrc.contactadvisors.controllers.routes.SecureMessageController.submitV2(), 'id -> "form-submit-customer-advice") {
+@formCSFR(action = uk.gov.hmrc.contactadvisors.controllers.routes.SecureMessageController.submitV2(), Symbol("id") -> "form-submit-customer-advice") {
 
 
 @govukTextarea(Textarea(
