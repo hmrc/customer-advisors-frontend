@@ -3,7 +3,7 @@ import uk.gov.hmrc.DefaultBuildSettings.{ defaultSettings, scalaSettings }
 val appName = "customer-advisors-frontend"
 
 Global / majorVersion := 2
-Global / scalaVersion := "3.4.2"
+Global / scalaVersion := "3.3.4"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
