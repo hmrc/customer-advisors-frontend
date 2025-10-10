@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import sbt.Keys.parallelExecution
+import sbt.{Def, *}
 import scoverage.ScoverageKeys
-import sbt._
 
 object ScoverageSettings {
-  def apply() =
+  def apply(): Seq[Def.Setting[? >: String & Double & Boolean]] =
     Seq(
       // Semicolon-separated list of regexes matching classes to exclude
       ScoverageKeys.coverageExcludedPackages := "<empty>;.*Reverse.*;.*(config|testonly|views).*;.*(BuildInfo|Routes).*",
