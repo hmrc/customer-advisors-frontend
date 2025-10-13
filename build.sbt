@@ -24,7 +24,6 @@ lazy val microservice = Project(appName, file("."))
       "-Wconf:src=views/.*:s"
     )
   )
-  .settings(resolvers ++= Seq(Resolver.jcenterRepo))
   .settings(ScoverageSettings())
 
 lazy val it = (project in file("it"))
