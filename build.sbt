@@ -20,7 +20,8 @@ lazy val microservice = Project(appName, file("."))
     scalacOptions := scalacOptions.value.diff(Seq("-Wunused:all")),
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s",
-      "-Wconf:msg=Flag.*repeatedly:s"
+      "-Wconf:msg=Flag.*repeatedly:s",
+      "-Wconf:src=views/.*:s"
     )
   )
   .settings(resolvers ++= Seq(Resolver.jcenterRepo))
