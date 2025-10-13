@@ -4,6 +4,7 @@ val appName = "customer-advisors-frontend"
 
 Global / majorVersion := 2
 Global / scalaVersion := "3.3.6"
+Global / lintUnusedKeysOnLoad := false
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
