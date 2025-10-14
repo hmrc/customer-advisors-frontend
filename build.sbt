@@ -3,7 +3,8 @@ import uk.gov.hmrc.DefaultBuildSettings.{ defaultSettings, scalaSettings }
 val appName = "customer-advisors-frontend"
 
 Global / majorVersion := 2
-Global / scalaVersion := "3.3.4"
+Global / scalaVersion := "3.3.6"
+Global / lintUnusedKeysOnLoad := false
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -15,9 +16,14 @@ lazy val microservice = Project(appName, file("."))
     Test / fork := false,
     Test / retrieveManaged := true,
     update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    routesGenerator := InjectedRoutesGenerator
+    routesGenerator := InjectedRoutesGenerator,
+    scalacOptions := scalacOptions.value.diff(Seq("-Wunused:all")),
+    scalacOptions ++= Seq(
+      "-Wconf:src=routes/.*:s",
+      "-Wconf:msg=Flag.*repeatedly:s",
+      "-Wconf:src=views/.*:s"
+    )
   )
-  .settings(resolvers ++= Seq(Resolver.jcenterRepo))
   .settings(ScoverageSettings())
 
 lazy val it = (project in file("it"))
@@ -29,5 +35,5 @@ Test / test := (Test / test)
   .value
 
 it / test := (it / Test / test)
-  .dependsOn(scalafmtCheckAll, it/scalafmtCheckAll)
+  .dependsOn(scalafmtCheckAll, it / scalafmtCheckAll)
   .value
