@@ -16,14 +16,18 @@
 
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardPage
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.servicenavigation._
 
 @this(hmrcStandardPage: HmrcStandardPage)
 
-@(pageTitle: Option[String])(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
+@(pageTitle: String)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @hmrcStandardPage(
   HmrcStandardPageParams(
-    pageTitle = pageTitle,
-    isWelshTranslationAvailable = false /* or false if your service has not been translated */
+    pageTitle = Some(pageTitle),
+    isWelshTranslationAvailable = false,
+    serviceNavigation = Some(
+        ServiceNavigation(serviceName = Some("Customer Advisors Frontend"))
+    )
   )
 )(contentBlock)
