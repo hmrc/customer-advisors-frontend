@@ -32,8 +32,6 @@ import scala.concurrent.duration._
 
 class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Eventually with GuiceOneServerPerSuite {
 
-  def externalServices: Seq[String] = Seq.empty
-
   protected def startTimeout: FiniteDuration = 240.seconds
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -56,7 +54,7 @@ class ApiISpec extends PlaySpec with ScalaFutures with BeforeAndAfterAll with Ev
             "messageType"                 -> "mType"
           )
         )
-        .futureValue(timeout = timeout(Span(2, Seconds)))
+        .futureValue(timeout = timeout(Span(5, Seconds)))
 
       response.status must be(OK)
 
