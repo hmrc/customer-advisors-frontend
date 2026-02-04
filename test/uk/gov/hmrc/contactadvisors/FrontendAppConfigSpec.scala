@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,7 @@
 
 package uk.gov.hmrc.contactadvisors
 
-import org.mockito.Mockito.when
-import play.api.{ Configuration, Environment }
 import uk.gov.hmrc.utils.SpecBase
-
-import org.mockito.ArgumentMatchers.any
 
 class FrontendAppConfigSpec extends SpecBase {
 
@@ -45,21 +41,6 @@ class FrontendAppConfigSpec extends SpecBase {
   "reportAProblemNonJSUrl" should {
     "return the correct value" in new Setup {
       appConfig.reportAProblemNonJSUrl must be("unused")
-    }
-  }
-
-  "loadConfig" should {
-    "throw exception for missing key" ignore {
-      val config = mock[Configuration]
-      val environment = mock[Environment]
-
-      val appConfig: FrontendAppConfig = new FrontendAppConfig(config, environment)
-
-      when(config.getOptional(any)(any)).thenReturn(None)
-
-      intercept[Exception] {
-        appConfig.analyticsHost
-      }.getMessage mustBe "Missing configuration key:"
     }
   }
 
