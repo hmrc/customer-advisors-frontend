@@ -17,27 +17,27 @@
 package uk.gov.hmrc.contactadvisors.controllers
 
 import org.jsoup.Jsoup
-import org.scalatest.Inside
+import org.scalatest.{ Assertion, Inside }
 import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
-import play.api.http.Status
+import play.api.http.Status.{ OK, SEE_OTHER }
 import play.api.i18n.MessagesApi
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{ MessagesControllerComponents, Result }
+import play.api.mvc.{ AnyContentAsEmpty, MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.dependencies.{ EntityResolverStub, MessageStub }
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage._
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.*
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
 
 import java.util.UUID
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 class SecureMessageControllerSpec
     extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock
@@ -51,31 +51,33 @@ class SecureMessageControllerSpec
     .build()
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  val getRequest = FakeRequest("GET", "/")
-  val postRequest = FakeRequest("POST", "/")
-  val customer_utr = UUID.randomUUID.toString
+  val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
+  val postRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
+  val customer_utr: String = UUID.randomUUID.toString
 
-  val utr = SaUtr("123456789")
+  val utr: SaUtr = SaUtr("123456789")
   val subject = "This is a response to your HMRC request"
   val adviceBody = "<p>This is the content of the secure message</p>"
 
-  val controllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  val controllerComponents: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
 
-  val customerAdviceAudit = app.injector.instanceOf[CustomerAdviceAudit]
-  val secureMessageService = app.injector.instanceOf[SecureMessageService]
-  val appConfig = app.injector.instanceOf[FrontendAppConfig]
-  val messageApi = app.injector.instanceOf[MessagesApi]
-  val inboxPage = app.injector.instanceOf[Inbox]
-  val inboxPageV2 = app.injector.instanceOf[InboxV2]
-  val successPage = app.injector.instanceOf[Success]
-  val successPageV2 = app.injector.instanceOf[SuccessV2]
-  val duplicatePage = app.injector.instanceOf[Duplicate]
-  val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
-  val notPaperlessPage = app.injector.instanceOf[Not_paperless]
-  val unknownPage = app.injector.instanceOf[Unknown]
-  val unexpectedPage = app.injector.instanceOf[Unexpected]
-  val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
-  val controller = new SecureMessageController(
+  val customerAdviceAudit: CustomerAdviceAudit = app.injector.instanceOf[CustomerAdviceAudit]
+  val secureMessageService: SecureMessageService = app.injector.instanceOf[SecureMessageService]
+
+  val appConfig: FrontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+  val messageApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+  val inboxPage: Inbox = app.injector.instanceOf[Inbox]
+  val inboxPageV2: InboxV2 = app.injector.instanceOf[InboxV2]
+  val successPage: Success = app.injector.instanceOf[Success]
+  val successPageV2: SuccessV2 = app.injector.instanceOf[SuccessV2]
+  val duplicatePage: Duplicate = app.injector.instanceOf[Duplicate]
+  val duplicatePageV2: DuplicateV2 = app.injector.instanceOf[DuplicateV2]
+  val notPaperlessPage: Not_paperless = app.injector.instanceOf[Not_paperless]
+  val unknownPage: Unknown = app.injector.instanceOf[Unknown]
+  val unexpectedPage: Unexpected = app.injector.instanceOf[Unexpected]
+  val unexpectedV2Page: UnexpectedV2 = app.injector.instanceOf[UnexpectedV2]
+
+  val controller: SecureMessageController = new SecureMessageController(
     controllerComponents,
     customerAdviceAudit,
     secureMessageService,
@@ -92,12 +94,13 @@ class SecureMessageControllerSpec
   )(app.injector.instanceOf[FrontendAppConfig], ec) {
     def auditSource: String = "customer-advisors-frontend"
   }
-  val externalRefID = secureMessageService.generateExternalRefID
+
+  val externalRefID: String = secureMessageService.generateExternalRefID
 
   "GET /inbox/:utr" should {
     "return 200" in {
       val result = controller.inbox(customer_utr)(getRequest)
-      status(result) must be(Status.OK)
+      status(result) must be(OK)
     }
 
     "return HTML" in {
@@ -114,7 +117,7 @@ class SecureMessageControllerSpec
 
     "have the expected elements on the form" in {
       val result = controller.inbox(customer_utr)(getRequest)
-      status(result) must be(200)
+      status(result) must be(OK)
 
       val document = Jsoup.parse(contentAsString(result))
       val form = document.select("form#form-submit-customer-advice").get(0)
@@ -146,7 +149,7 @@ class SecureMessageControllerSpec
   "GET /customer-advisors-frontend/inbox" should {
     "return 200" in {
       val result = controller.inboxV2()(getRequest)
-      status(result) must be(Status.OK)
+      status(result) must be(OK)
     }
 
     "return HTML" in {
@@ -163,7 +166,7 @@ class SecureMessageControllerSpec
 
     "have the expected elements on the form" in {
       val result = controller.inboxV2()(getRequest)
-      status(result) must be(200)
+      status(result) must be(OK)
 
       val document = Jsoup.parse(contentAsString(result))
       val form = document.select("form#form-submit-customer-advice").get(0)
@@ -319,7 +322,7 @@ class SecureMessageControllerSpec
     }
   }
 
-  def submissionOfCompletedForm() = controller.submit(utr.value)(
+  def submissionOfCompletedForm(): Future[Result] = controller.submit(utr.value)(
     FakeRequest(routes.SecureMessageController.submit(utr.value)).withFormUrlEncodedBody(
       "subject" -> subject,
       "message" -> adviceBody
@@ -327,8 +330,8 @@ class SecureMessageControllerSpec
   )
 
   implicit class ShouldContainPageWithMessage(result: Future[Result]) {
-    def shouldContainPageWithTitleAndMessage(title: String, utr: String, message: String) = {
-      status(result) must be(200)
+    def shouldContainPageWithTitleAndMessage(title: String, utr: String, message: String): Assertion = {
+      status(result) must be(OK)
       contentType(result) must be(Some("text/html"))
       charset(result) must be(Some("utf-8"))
 
@@ -350,8 +353,8 @@ class SecureMessageControllerSpec
       }
     }
 
-    def shouldContainPageWithTitleAndSuccessMessage(title: String, utr: String, message: String) = {
-      status(result) must be(200)
+    def shouldContainPageWithTitleAndSuccessMessage(title: String, utr: String, message: String): Assertion = {
+      status(result) must be(OK)
       contentType(result) must be(Some("text/html"))
       charset(result) must be(Some("utf-8"))
 
@@ -376,8 +379,8 @@ class SecureMessageControllerSpec
   }
 
   implicit class ReturnsRedirectTo(result: Future[Result]) {
-    def returnsRedirectTo(url: String) = {
-      status(result) must be(303)
+    def returnsRedirectTo(url: String): Any = {
+      status(result) must be(SEE_OTHER)
 
       redirectLocation(result) match {
         case Some(redirect) => redirect must startWith(s"/secure-message$url")

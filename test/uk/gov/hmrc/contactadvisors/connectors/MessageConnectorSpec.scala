@@ -18,20 +18,22 @@ package uk.gov.hmrc.contactadvisors.connectors
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.*
 import com.github.tomakehurst.wiremock.http.Fault
 import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status
-import play.api.libs.json.Json
+import play.api.libs.json.{ JsObject, JsResultException, Json }
+import uk.gov.hmrc.contactadvisors.connectors.models.SecureMessage
 import uk.gov.hmrc.contactadvisors.domain.{ AdviceAlreadyExists, AdviceStored, StorageResult, UnexpectedError }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
+import play.api.http.Status.{ BAD_REQUEST, CONFLICT, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, UNAUTHORIZED, UNSUPPORTED_MEDIA_TYPE }
+import uk.gov.hmrc.utils.TestData.TEST_ID
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
@@ -53,19 +55,19 @@ class MessageConnectorSpec()
   val messagePort = 58008
   override lazy val wireMockServer = new WireMockServer(wireMockConfig().port(messagePort))
 
-  override def beforeAll() = {
+  override def beforeAll(): Unit = {
     super.beforeAll()
     wireMockServer.start()
     WireMock.configureFor(messagePort)
   }
 
-  override def beforeEach() = {
+  override def beforeEach(): Unit = {
     super.beforeEach()
     wireMockServer.resetMappings()
     wireMockServer.resetRequests()
   }
 
-  override def afterAll() = {
+  override def afterAll(): Unit = {
     super.afterAll()
     wireMockServer.stop()
   }
@@ -74,7 +76,7 @@ class MessageConnectorSpec()
     "return the message id from the response" in new TestCase {
       givenThat(
         post(urlEqualTo(expectedPath)).willReturn(
-          aResponse().withStatus(Status.CREATED).withBody("""{"id":"12341234"}""")
+          aResponse().withStatus(CREATED).withBody("""{"id":"12341234"}""")
         )
       )
 
@@ -83,33 +85,34 @@ class MessageConnectorSpec()
 
     "return MessageAlreadyExists failure with true when the message service returns 409 (conflict) while saving" in
       new TestCase {
-        stubFor(post(urlEqualTo(expectedPath)).willReturn(aResponse().withStatus(Status.CONFLICT)))
+        stubFor(post(urlEqualTo(expectedPath)).willReturn(aResponse().withStatus(CONFLICT)))
         connector.create(secureMessage).futureValue must be(AdviceAlreadyExists)
 
       }
 
-    forAll(Table("statusCode", 400, 401, 404, 415, 500)) { statusCode =>
-      s"return Failure with reason for status=$statusCode" in new TestCase {
+    forAll(Table("statusCode", BAD_REQUEST, UNAUTHORIZED, NOT_FOUND, UNSUPPORTED_MEDIA_TYPE, INTERNAL_SERVER_ERROR)) {
+      statusCode =>
+        s"return Failure with reason for status=$statusCode" in new TestCase {
 
-        val errorMessage = Json.obj("reason" -> "something went wrong")
-        givenThat(
-          post(urlEqualTo(expectedPath))
-            .willReturn(
-              aResponse()
-                .withStatus(statusCode)
-                .withBody(errorMessage.toString())
-            )
-        )
+          val errorMessage: JsObject = Json.obj("reason" -> "something went wrong")
+          givenThat(
+            post(urlEqualTo(expectedPath))
+              .willReturn(
+                aResponse()
+                  .withStatus(statusCode)
+                  .withBody(errorMessage.toString())
+              )
+          )
 
-        val response: StorageResult = connector.create(secureMessage).futureValue
-        response match {
-          case UnexpectedError(reason) =>
-            reason must include(expectedPath)
-            reason must include(statusCode.toString)
-            reason must include("'{\"reason\":\"something went wrong\"}'")
-          case _ => fail("Unexpected storage result")
+          val response: StorageResult = connector.create(secureMessage).futureValue
+          response match {
+            case UnexpectedError(reason) =>
+              reason must include(expectedPath)
+              reason must include(statusCode.toString)
+              reason must include("'{\"reason\":\"something went wrong\"}'")
+            case _ => fail("Unexpected storage result")
+          }
         }
-      }
     }
 
     "fail when an IOException occurs when saving" in new TestCase {
@@ -121,17 +124,37 @@ class MessageConnectorSpec()
           )
       )
 
-      val response = connector.create(secureMessage).futureValue
+      val response: StorageResult = connector.create(secureMessage).futureValue
       response must be(UnexpectedError("Remotely closed"))
     }
   }
 
-  trait TestCase {
-    // val messageServiceBaseUrl = s"http://localhost:$messagePort"
-    val expectedPath = s"/messages"
+  "MessageResponse.formats" should {
+    import MessageResponse.formats
 
-    val secureMessage = SecureMessageCreator.message
+    "read the json correctly" in new TestCase {
+      Json.parse(messageResponseJsonString).as[MessageResponse] mustBe messageResponse
+    }
+
+    "throw exception for invalid json" in new TestCase {
+      intercept[JsResultException] {
+        Json.parse(messageResponseInvalidJsonString).as[MessageResponse]
+      }
+    }
+
+    "write the object correctly" in new TestCase {
+      Json.toJson(messageResponse) mustBe Json.parse(messageResponseJsonString)
+    }
+  }
+
+  trait TestCase {
+    val expectedPath = s"/messages"
+    val messageResponse: MessageResponse = MessageResponse(TEST_ID)
+    val messageResponseJsonString: String = """{"id":"test_id"}""".stripMargin
+    val messageResponseInvalidJsonString: String = """{}""".stripMargin
+
+    val secureMessage: SecureMessage = SecureMessageCreator.message
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    val connector = app.injector.instanceOf[TestMessageConnector]
+    val connector: TestMessageConnector = app.injector.instanceOf[TestMessageConnector]
   }
 }
