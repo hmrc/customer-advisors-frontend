@@ -47,8 +47,9 @@ class CustomerAdviceAuditV2Spec extends SpecBase with ScalaFutures {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val appConfig: FrontendAppConfig = instanceOf[FrontendAppConfig](app)
+
   val controllerComponents: MessagesControllerComponents = instanceOf[MessagesControllerComponents](app)
-  val messageApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+  val messageApi: MessagesApi = instanceOf[MessagesApi](app)
 
   val inboxPage: Inbox = instanceOf[Inbox](app)
   val inboxPageV2: InboxV2 = instanceOf[InboxV2](app)
