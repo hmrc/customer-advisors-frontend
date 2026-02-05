@@ -23,8 +23,6 @@ import javax.inject.{ Inject, Singleton }
 import org.scalatest.Inside.*
 import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
 import org.scalatest.prop.TableDrivenPropertyChecks
-import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.{ BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED, UNSUPPORTED_MEDIA_TYPE }
 import play.api.libs.json.{ JsObject, JsResultException, Json }
 import play.api.{ Configuration, Environment }
@@ -33,7 +31,7 @@ import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.utils.WithWiremock
+import uk.gov.hmrc.utils.{ SpecBase, WithWiremock }
 
 import scala.concurrent.ExecutionContext
 
@@ -49,8 +47,7 @@ class TestEntityResolverConnector @Inject() (
 }
 
 class EntityResolverConnectorSpec
-    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with WithWiremock with TableDrivenPropertyChecks
-    with IntegrationPatience {
+    extends SpecBase with ScalaFutures with WithWiremock with TableDrivenPropertyChecks with IntegrationPatience {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -126,7 +123,7 @@ class EntityResolverConnectorSpec
 
     def pathToPreferences: String = s"/portal/preferences/sa/$utr"
 
-    def connector: TestEntityResolverConnector = app.injector.instanceOf(classOf[TestEntityResolverConnector])
+    def connector: TestEntityResolverConnector = instanceOf[TestEntityResolverConnector]()
 
     def entityResolverReturns(status: Int, responseBody: Option[JsObject] = None): StubMapping =
       givenThat(

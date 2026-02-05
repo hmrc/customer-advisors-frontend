@@ -30,4 +30,6 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar {
       "metrics.enabled" -> "false"
     )
     .build()
+
+  def instanceOf[T: scala.reflect.ClassTag](application: Application = app): T = application.injector.instanceOf[T]
 }

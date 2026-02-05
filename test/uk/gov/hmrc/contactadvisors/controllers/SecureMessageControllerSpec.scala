@@ -19,12 +19,10 @@ package uk.gov.hmrc.contactadvisors.controllers
 import org.jsoup.Jsoup
 import org.scalatest.{ Assertion, Inside }
 import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
-import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status.{ OK, SEE_OTHER }
 import play.api.i18n.MessagesApi
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{ AnyContentAsEmpty, MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -33,17 +31,17 @@ import uk.gov.hmrc.contactadvisors.dependencies.{ EntityResolverStub, MessageStu
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
 import uk.gov.hmrc.contactadvisors.views.html.secureMessage.*
 import uk.gov.hmrc.domain.SaUtr
-import uk.gov.hmrc.utils.{ SecureMessageCreator, WithWiremock }
+import uk.gov.hmrc.utils.{ SecureMessageCreator, SpecBase, WithWiremock }
 
 import java.util.UUID
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.jdk.CollectionConverters.*
 
 class SecureMessageControllerSpec
-    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock
+    extends SpecBase with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock
     with EntityResolverStub with MessageStub {
 
-  implicit lazy override val app: Application = new GuiceApplicationBuilder()
+  implicit lazy override val app: Application = applicationBuilder
     .configure(
       "microservice.services.message.port"         -> "10100",
       "microservice.services.entity-resolver.port" -> "10100"
@@ -59,23 +57,24 @@ class SecureMessageControllerSpec
   val subject = "This is a response to your HMRC request"
   val adviceBody = "<p>This is the content of the secure message</p>"
 
-  val controllerComponents: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  val controllerComponents: MessagesControllerComponents = instanceOf[MessagesControllerComponents](app)
 
-  val customerAdviceAudit: CustomerAdviceAudit = app.injector.instanceOf[CustomerAdviceAudit]
-  val secureMessageService: SecureMessageService = app.injector.instanceOf[SecureMessageService]
+  val customerAdviceAudit: CustomerAdviceAudit = instanceOf[CustomerAdviceAudit](app)
+  val secureMessageService: SecureMessageService = instanceOf[SecureMessageService](app)
 
-  val appConfig: FrontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-  val messageApi: MessagesApi = app.injector.instanceOf[MessagesApi]
-  val inboxPage: Inbox = app.injector.instanceOf[Inbox]
-  val inboxPageV2: InboxV2 = app.injector.instanceOf[InboxV2]
-  val successPage: Success = app.injector.instanceOf[Success]
-  val successPageV2: SuccessV2 = app.injector.instanceOf[SuccessV2]
-  val duplicatePage: Duplicate = app.injector.instanceOf[Duplicate]
-  val duplicatePageV2: DuplicateV2 = app.injector.instanceOf[DuplicateV2]
-  val notPaperlessPage: Not_paperless = app.injector.instanceOf[Not_paperless]
-  val unknownPage: Unknown = app.injector.instanceOf[Unknown]
-  val unexpectedPage: Unexpected = app.injector.instanceOf[Unexpected]
-  val unexpectedV2Page: UnexpectedV2 = app.injector.instanceOf[UnexpectedV2]
+  val appConfig: FrontendAppConfig = instanceOf[FrontendAppConfig](app)
+  val messageApi: MessagesApi = instanceOf[MessagesApi](app)
+
+  val inboxPage: Inbox = instanceOf[Inbox](app)
+  val inboxPageV2: InboxV2 = instanceOf[InboxV2](app)
+  val successPage: Success = instanceOf[Success](app)
+  val successPageV2: SuccessV2 = instanceOf[SuccessV2](app)
+  val duplicatePage: Duplicate = instanceOf[Duplicate](app)
+  val duplicatePageV2: DuplicateV2 = instanceOf[DuplicateV2](app)
+  val notPaperlessPage: Not_paperless = instanceOf[Not_paperless](app)
+  val unknownPage: Unknown = instanceOf[Unknown](app)
+  val unexpectedPage: Unexpected = instanceOf[Unexpected](app)
+  val unexpectedV2Page: UnexpectedV2 = instanceOf[UnexpectedV2](app)
 
   val controller: SecureMessageController = new SecureMessageController(
     controllerComponents,
@@ -91,7 +90,7 @@ class SecureMessageControllerSpec
     unknownPage,
     unexpectedPage,
     unexpectedV2Page
-  )(app.injector.instanceOf[FrontendAppConfig], ec) {
+  )(instanceOf[FrontendAppConfig](app), ec) {
     def auditSource: String = "customer-advisors-frontend"
   }
 

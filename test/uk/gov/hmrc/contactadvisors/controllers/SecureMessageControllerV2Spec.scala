@@ -19,29 +19,27 @@ package uk.gov.hmrc.contactadvisors.controllers
 import org.jsoup.Jsoup
 import org.scalatest.Inside
 import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
-import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{ MessagesControllerComponents, Result }
+import play.api.mvc.{ AnyContentAsEmpty, MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.dependencies.MessageStubV2
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage._
-import uk.gov.hmrc.utils.{ SecureMessageCreatorV2, WithWiremock }
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.*
+import uk.gov.hmrc.utils.{ SecureMessageCreatorV2, SpecBase, WithWiremock }
 
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 class SecureMessageControllerV2Spec
-    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock
+    extends SpecBase with GuiceOneAppPerSuite with ScalaFutures with IntegrationPatience with WithWiremock
     with MessageStubV2 {
 
-  implicit lazy override val app: Application = new GuiceApplicationBuilder()
+  implicit lazy override val app: Application = applicationBuilder
     .configure(
       "microservice.services.message.port"         -> "10100",
       "microservice.services.entity-resolver.port" -> "10100"
@@ -50,8 +48,9 @@ class SecureMessageControllerV2Spec
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  val getRequest = FakeRequest("GET", "/")
-  val postRequest = FakeRequest("POST", "/")
+  val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
+  val postRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("POST", "/")
+
   val subject = "This is a response to your HMRC request"
   val content = "A message success to the customer."
   val recipientTaxidentifierName = "HMRC-OBTDS-ORG"
@@ -60,24 +59,27 @@ class SecureMessageControllerV2Spec
   val recipientNameLine1 = "Mr. John Smith"
   val messageType = "fhddsAlertMessage"
   val adviceBody = "<p>This is the content of the secure message</p>"
-  val messagesApi = app.injector.instanceOf[MessagesApi]
-  val appConfig = app.injector.instanceOf[FrontendAppConfig]
-  val controllerComponents = app.injector.instanceOf[MessagesControllerComponents]
-  val messageApi = app.injector.instanceOf[MessagesApi]
-  val customerAdviceAudit = app.injector.instanceOf[CustomerAdviceAudit]
-  val secureMessageService = app.injector.instanceOf[SecureMessageService]
-  val inboxPage = app.injector.instanceOf[Inbox]
-  val inboxPageV2 = app.injector.instanceOf[InboxV2]
-  val successPage = app.injector.instanceOf[Success]
-  val successPageV2 = app.injector.instanceOf[SuccessV2]
-  val duplicatePage = app.injector.instanceOf[Duplicate]
-  val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
-  val notPaperlessPage = app.injector.instanceOf[Not_paperless]
-  val unknownPage = app.injector.instanceOf[Unknown]
-  val unexpectedPage = app.injector.instanceOf[Unexpected]
-  val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
 
-  val externalRefID = secureMessageService.generateExternalRefID
+  val messagesApi: MessagesApi = instanceOf[MessagesApi](app)
+  val appConfig: FrontendAppConfig = instanceOf[FrontendAppConfig](app)
+  val controllerComponents: MessagesControllerComponents = instanceOf[MessagesControllerComponents](app)
+  val messageApi: MessagesApi = instanceOf[MessagesApi](app)
+
+  val customerAdviceAudit: CustomerAdviceAudit = instanceOf[CustomerAdviceAudit](app)
+  val secureMessageService: SecureMessageService = instanceOf[SecureMessageService](app)
+
+  val inboxPage: Inbox = instanceOf[Inbox](app)
+  val inboxPageV2: InboxV2 = instanceOf[InboxV2](app)
+  val successPage: Success = instanceOf[Success](app)
+  val successPageV2: SuccessV2 = instanceOf[SuccessV2](app)
+  val duplicatePage: Duplicate = instanceOf[Duplicate](app)
+  val duplicatePageV2: DuplicateV2 = instanceOf[DuplicateV2](app)
+  val notPaperlessPage: Not_paperless = instanceOf[Not_paperless](app)
+  val unknownPage: Unknown = instanceOf[Unknown](app)
+  val unexpectedPage: Unexpected = instanceOf[Unexpected](app)
+  val unexpectedV2Page: UnexpectedV2 = instanceOf[UnexpectedV2](app)
+
+  val externalRefID: String = secureMessageService.generateExternalRefID
 
   val controller = new SecureMessageController(
     controllerComponents,
@@ -115,7 +117,7 @@ class SecureMessageControllerV2Spec
 
     "have the expected elements on the form" in {
       val result = controller.inboxV2()(getRequest)
-      status(result) must be(200)
+      status(result) must be(OK)
 
       val document = Jsoup.parse(contentAsString(result))
       val form = document.select("form#form-submit-customer-advice").get(0)
@@ -259,7 +261,7 @@ class SecureMessageControllerV2Spec
     "contain correct message for success" in {
       val result = controller.successV2()(getRequest)
 
-      status(result) must be(200)
+      status(result) must be(OK)
       contentType(result) must be(Some("text/html"))
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
@@ -275,7 +277,7 @@ class SecureMessageControllerV2Spec
     }
     "contain correct message for duplicate" in {
       val result = controller.duplicateV2()(getRequest)
-      status(result) must be(200)
+      status(result) must be(OK)
       contentType(result) must be(Some("text/html"))
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
@@ -288,7 +290,7 @@ class SecureMessageControllerV2Spec
 
     "contain correct message for unexpected error" in {
       val result = controller.unexpectedV2()(getRequest)
-      status(result) must be(200)
+      status(result) must be(OK)
       contentType(result) must be(Some("text/html"))
       charset(result) must be(Some("utf-8"))
       val document = Jsoup.parse(contentAsString(result))
@@ -332,7 +334,7 @@ class SecureMessageControllerV2Spec
     }
   }
 
-  def submissionOfCompletedForm() = controller.submitV2()(
+  def submissionOfCompletedForm(): Future[Result] = controller.submitV2()(
     FakeRequest().withFormUrlEncodedBody(
       "content"                     -> "content",
       "subject"                     -> "subject",
@@ -347,7 +349,7 @@ class SecureMessageControllerV2Spec
 
   implicit class ReturnsRedirectTo(result: Future[Result]) {
     def returnsRedirectTo(url: String) = {
-      status(result) must be(303)
+      status(result) must be(SEE_OTHER)
       redirectLocation(result) match {
         case Some(redirect) => redirect must (startWith(s"/secure-message$url"))
         case _              => fail("redirect location should always be present")
