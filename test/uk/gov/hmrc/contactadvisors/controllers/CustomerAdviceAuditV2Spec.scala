@@ -22,59 +22,63 @@ import org.mockito.Mockito.{ clearInvocations, verify, when }
 import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar.mock
-import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.SEE_OTHER
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.SeeOther
-import play.api.mvc.{ MessagesControllerComponents, Result }
+import play.api.mvc.{ AnyContentAsFormUrlEncoded, MessagesControllerComponents, Result }
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ defaultAwaitTimeout, status }
 import uk.gov.hmrc.contactadvisors.FrontendAppConfig
 import uk.gov.hmrc.contactadvisors.connectors.models.ExternalReferenceV2
-import uk.gov.hmrc.contactadvisors.domain._
+import uk.gov.hmrc.contactadvisors.domain.*
 import uk.gov.hmrc.contactadvisors.service.SecureMessageService
-import uk.gov.hmrc.contactadvisors.views.html.secureMessage._
+import uk.gov.hmrc.contactadvisors.views.html.secureMessage.*
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.EventKeys
 import uk.gov.hmrc.play.audit.http.connector.{ AuditConnector, AuditResult }
 import uk.gov.hmrc.play.audit.model.DataEvent
-import scala.concurrent.{ ExecutionContext, Future }
 
-class CustomerAdviceAuditV2Spec extends PlaySpec with ScalaFutures with GuiceOneAppPerSuite {
+import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.utils.SpecBase
+
+class CustomerAdviceAuditV2Spec extends SpecBase with ScalaFutures {
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  val appConfig = app.injector.instanceOf[FrontendAppConfig]
-  val controllerComponents = app.injector.instanceOf[MessagesControllerComponents]
-  val messageApi = app.injector.instanceOf[MessagesApi]
-  val inboxPage = app.injector.instanceOf[Inbox]
-  val inboxPageV2 = app.injector.instanceOf[InboxV2]
-  val successPage = app.injector.instanceOf[Success]
-  val successPageV2 = app.injector.instanceOf[SuccessV2]
-  val duplicatePage = app.injector.instanceOf[Duplicate]
-  val duplicatePageV2 = app.injector.instanceOf[DuplicateV2]
-  val notPaperlessPage = app.injector.instanceOf[Not_paperless]
-  val unknownPage = app.injector.instanceOf[Unknown]
-  val unexpectedPage = app.injector.instanceOf[Unexpected]
-  val unexpectedV2Page = app.injector.instanceOf[UnexpectedV2]
+  val appConfig: FrontendAppConfig = instanceOf[FrontendAppConfig](app)
+
+  val controllerComponents: MessagesControllerComponents = instanceOf[MessagesControllerComponents](app)
+  val messageApi: MessagesApi = instanceOf[MessagesApi](app)
+
+  val inboxPage: Inbox = instanceOf[Inbox](app)
+  val inboxPageV2: InboxV2 = instanceOf[InboxV2](app)
+  val successPage: Success = instanceOf[Success](app)
+  val successPageV2: SuccessV2 = instanceOf[SuccessV2](app)
+  val duplicatePage: Duplicate = instanceOf[Duplicate](app)
+  val duplicatePageV2: DuplicateV2 = instanceOf[DuplicateV2](app)
+  val notPaperlessPage: Not_paperless = instanceOf[Not_paperless](app)
+  val unknownPage: Unknown = instanceOf[Unknown](app)
+  val unexpectedPage: Unexpected = instanceOf[Unexpected](app)
+  val unexpectedV2Page: UnexpectedV2 = instanceOf[UnexpectedV2](app)
+
   lazy val auditConnectorMock: AuditConnector = mock[AuditConnector]
-  lazy val secureMessageServiceMock = mock[SecureMessageService]
+  lazy val secureMessageServiceMock: SecureMessageService = mock[SecureMessageService]
   lazy val customerAdviceAudit = new CustomerAdviceAudit(auditConnectorMock)
 
-  val requestV2 = FakeRequest("POST", "/customer-advisors-frontend/submit").withFormUrlEncodedBody(
-    "content"                     -> "content",
-    "subject"                     -> "subject",
-    "recipientTaxidentifierName"  -> "HMRC-OBTDS-ORG",
-    "recipientTaxidentifierValue" -> "XZFH00000100024",
-    "recipientEmail"              -> "foo@bar.com",
-    "recipientNameLine1"          -> "Mr. John Smith",
-    "messageType"                 -> "fhddsAlertMessage",
-    "alertQueue"                  -> "PRIORITY"
-  )
+  val requestV2: FakeRequest[AnyContentAsFormUrlEncoded] =
+    FakeRequest("POST", "/customer-advisors-frontend/submit").withFormUrlEncodedBody(
+      "content"                     -> "content",
+      "subject"                     -> "subject",
+      "recipientTaxidentifierName"  -> "HMRC-OBTDS-ORG",
+      "recipientTaxidentifierValue" -> "XZFH00000100024",
+      "recipientEmail"              -> "foo@bar.com",
+      "recipientNameLine1"          -> "Mr. John Smith",
+      "messageType"                 -> "fhddsAlertMessage",
+      "alertQueue"                  -> "PRIORITY"
+    )
 
-  val request = FakeRequest("POST", "/inbox/123456789").withFormUrlEncodedBody(
+  val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST", "/inbox/123456789").withFormUrlEncodedBody(
     "subject" -> "New message subject",
     "message" -> "New message body"
   )

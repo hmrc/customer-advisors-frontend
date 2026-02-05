@@ -17,22 +17,21 @@
 package uk.gov.hmrc.contactadvisors.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 
 import javax.inject.{ Inject, Singleton }
-import org.scalatest.Inside._
+import org.scalatest.Inside.*
 import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
 import org.scalatest.prop.TableDrivenPropertyChecks
-import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status
-import play.api.libs.json.{ JsObject, Json }
+import play.api.http.Status.{ BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED, UNSUPPORTED_MEDIA_TYPE }
+import play.api.libs.json.{ JsObject, JsResultException, Json }
 import play.api.{ Configuration, Environment }
 import uk.gov.hmrc.contactadvisors.domain.UnexpectedFailure
 import uk.gov.hmrc.domain.SaUtr
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.utils.WithWiremock
+import uk.gov.hmrc.utils.{ SpecBase, WithWiremock }
 
 import scala.concurrent.ExecutionContext
 
@@ -48,8 +47,7 @@ class TestEntityResolverConnector @Inject() (
 }
 
 class EntityResolverConnectorSpec
-    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with WithWiremock with TableDrivenPropertyChecks
-    with IntegrationPatience {
+    extends SpecBase with ScalaFutures with WithWiremock with TableDrivenPropertyChecks with IntegrationPatience {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -59,7 +57,7 @@ class EntityResolverConnectorSpec
 
     "return true when provided a tax identifier for a valid user, opted-in for paperless" in new TestCase {
       entityResolverReturns(
-        Status.OK,
+        OK,
         Some(
           Json.obj(
             "digital" -> true,
@@ -75,36 +73,59 @@ class EntityResolverConnectorSpec
     }
 
     "return CustomerCannotReceiveAlerts when provided a tax identifier for a user that has opted out of paperless" in new TestCase {
-      entityResolverReturns(Status.OK, Some(Json.obj("digital" -> false)))
+      entityResolverReturns(OK, Some(Json.obj("digital" -> false)))
 
       connector.validPaperlessUserWith(utr).futureValue must be(Some(PaperlessPreference(false)))
     }
 
     "return UnknownTaxId when provided a tax identifier that cannot be resolved" in new TestCase {
-      entityResolverReturns(Status.NOT_FOUND)
+      entityResolverReturns(NOT_FOUND)
 
       connector.validPaperlessUserWith(utr).futureValue must be(None)
     }
 
-    forAll(Table("statusCode", 400, 401, 403, 415, 500)) { statusCode =>
-      s"return unexpected failure when the response has status $statusCode" in new TestCase {
-        entityResolverReturns(statusCode)
+    forAll(Table("statusCode", BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, UNSUPPORTED_MEDIA_TYPE, INTERNAL_SERVER_ERROR)) {
+      statusCode =>
+        s"return unexpected failure when the response has status $statusCode" in new TestCase {
+          entityResolverReturns(statusCode)
 
-        inside(connector.validPaperlessUserWith(utr).failed.futureValue) { case UnexpectedFailure(msg) =>
-          msg must include(statusCode.toString)
+          inside(connector.validPaperlessUserWith(utr).failed.futureValue) { case UnexpectedFailure(msg) =>
+            msg must include(statusCode.toString)
+          }
         }
+    }
+  }
+
+  "PaperlessPreference.formats" should {
+    import PaperlessPreference.formats
+
+    "read the json correctly" in new TestCase {
+      Json.parse(paperlessPreferenceJsonString).as[PaperlessPreference] mustBe paperlessPreference
+    }
+
+    "throw exception for invalid json" in new TestCase {
+      intercept[JsResultException] {
+        Json.parse(paperlessPreferenceInvalidJsonString).as[PaperlessPreference]
       }
+    }
+
+    "write the object correctly" in new TestCase {
+      Json.toJson(paperlessPreference) mustBe Json.parse(paperlessPreferenceJsonString)
     }
   }
 
   trait TestCase {
-    def utr = SaUtr("0329u490uwesakdjf")
+    val paperlessPreference: PaperlessPreference = PaperlessPreference(true)
+    val paperlessPreferenceJsonString: String = """{"digital":true}""".stripMargin
+    val paperlessPreferenceInvalidJsonString: String = """{}""".stripMargin
 
-    def pathToPreferences = s"/portal/preferences/sa/$utr"
+    def utr: SaUtr = SaUtr("0329u490uwesakdjf")
 
-    def connector = app.injector.instanceOf(classOf[TestEntityResolverConnector])
+    def pathToPreferences: String = s"/portal/preferences/sa/$utr"
 
-    def entityResolverReturns(status: Int, responseBody: Option[JsObject] = None) =
+    def connector: TestEntityResolverConnector = instanceOf[TestEntityResolverConnector]()
+
+    def entityResolverReturns(status: Int, responseBody: Option[JsObject] = None): StubMapping =
       givenThat(
         get(urlEqualTo(pathToPreferences)).willReturn(
           responseBody.fold(aResponse().withStatus(status).withBody("")) { json =>
