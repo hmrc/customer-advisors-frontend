@@ -29,6 +29,7 @@ lazy val microservice = Project(appName, file("."))
 lazy val it = (project in file("it"))
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
+  .settings(scalacOptions := scalacOptions.value.distinct)
 
 Test / test := (Test / test)
   .dependsOn(scalafmtCheckAll)

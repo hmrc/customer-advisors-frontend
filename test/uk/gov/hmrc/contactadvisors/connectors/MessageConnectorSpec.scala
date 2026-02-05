@@ -23,8 +23,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.*
 import com.github.tomakehurst.wiremock.http.Fault
 import org.scalatest.concurrent.{ IntegrationPatience, ScalaFutures }
 import org.scalatest.prop.TableDrivenPropertyChecks
-import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{ JsObject, JsResultException, Json }
 import uk.gov.hmrc.contactadvisors.connectors.models.SecureMessage
 import uk.gov.hmrc.contactadvisors.domain.{ AdviceAlreadyExists, AdviceStored, StorageResult, UnexpectedError }
@@ -37,6 +35,7 @@ import uk.gov.hmrc.utils.TestData.TEST_ID
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
+import uk.gov.hmrc.utils.SpecBase
 
 @Singleton
 class TestMessageConnector @Inject() (
@@ -49,8 +48,7 @@ class TestMessageConnector @Inject() (
 }
 
 class MessageConnectorSpec()
-    extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with WithWiremock with TableDrivenPropertyChecks
-    with IntegrationPatience {
+    extends SpecBase with ScalaFutures with WithWiremock with TableDrivenPropertyChecks with IntegrationPatience {
 
   val messagePort = 58008
   override lazy val wireMockServer = new WireMockServer(wireMockConfig().port(messagePort))
@@ -155,6 +153,6 @@ class MessageConnectorSpec()
 
     val secureMessage: SecureMessage = SecureMessageCreator.message
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    val connector: TestMessageConnector = app.injector.instanceOf[TestMessageConnector]
+    val connector: TestMessageConnector = instanceOf[TestMessageConnector]()
   }
 }
