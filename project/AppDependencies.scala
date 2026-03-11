@@ -3,7 +3,7 @@ import sbt.*
 
 object AppDependencies {
 
-  val bootstrap_version = "10.5.0"
+  val bootstrap_version = "10.7.0"
 
   val dependencies: Seq[ModuleID] = Seq(
     ws,
